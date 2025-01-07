@@ -17,3 +17,6 @@ Thumbs.db
 # Build output
 /dist/
 .build/
+
+#environmental variables
+.env
