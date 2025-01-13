@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,6 +9,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RefreshToken } from './schemas/refresh-token.schema';
 import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
+import { ResetToken } from './schemas/reset-tokens.schema';
+import { MailService } from 'src/services/mail.services';
 uuidv4();
 
 
@@ -18,6 +21,8 @@ export class AuthService {
 
   constructor(
     private jwtSerivce: JwtService,
+    private mailService: MailService,
+    @InjectModel(ResetToken.name) private ResetTokenModel: Model<ResetToken>,
     @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(RefreshToken.name) private RefreshTokenModel: Model<RefreshToken>) { }
 
@@ -59,16 +64,18 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException("Wrong Password");
     }
-    // Generate JWT tokens
 
+    // Generate JWT tokens
     const tokens = await this.generateUserTokens(user._id);
     return {
       ...tokens,
       userId: user._id
     };
   }
+
+
   async generateUserTokens(userId) {
-    const accessToken = this.jwtSerivce.sign({ userId }, { expiresIn: '1h' });
+    const accessToken = this.jwtSerivce.sign({ userId }, { expiresIn: '24h' });
     const refreshToken = uuidv4();
 
     await this.storeRefreshToken(refreshToken, userId);
@@ -80,6 +87,7 @@ export class AuthService {
 
   }
 
+  // Refresh Tokens
   async refreshTokens(refreshtoken: string) {
     const token = await this.RefreshTokenModel.findOne({
       token: refreshtoken,
@@ -97,6 +105,73 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 3)
     await this.RefreshTokenModel.updateOne({ userId }, { $set: { expiryDate, token } }, { upsert: true })
+  }
+
+  // Change Password
+  async changePassword(userId, oldPassword: string, newPassword: string) {
+    // Find the user
+    const user = await this.UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException("User not Found...");
+    }
+
+    // Compare the old password with the password in DB
+
+    const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!passwordMatch) {
+      throw new UnauthorizedException("Wrong credentials");
+    }
+
+    // Change user's password (Hash it)
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = newHashedPassword;
+    await user.save();
+  }
+
+  //Forgot Password
+  async forgotPassword(email: string) {
+    // Check that user exists
+    const user = await this.UserModel.findOne({ email });
+
+    if (user) {
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 1);      // If user exists, generate password reset link
+      const resetToken = nanoid(64);
+      await this.ResetTokenModel.create({
+        toekn: resetToken,
+        userId: user._id,
+        expiryDate: expiryDate
+      })
+      // Send the link to the user by email (using nodemailer)
+      this.mailService.sendPasswordResetEmail(email, resetToken);
+    }
+
+    return {
+      message: "If this user exists, they will receive an email"
+    };
+
+  }
+
+  async resetPassword(newPassword: string, resetToken: string) {
+    // Find a valid reset token document
+    const token = await this.ResetTokenModel.findOneAndDelete({
+      token: resetToken,
+      expiryDate: { $gte: new Date() },
+    });
+
+    if (!token) {
+      throw new UnauthorizedException(" Invalid link");
+    }
+    // Change user password (Hash)
+
+    const user = await this.UserModel.findById(token.userId);
+    if (!user) {
+      throw new InternalServerErrorException();
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
   }
 
 }

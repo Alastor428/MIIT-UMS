@@ -6,6 +6,8 @@ import { User, UserSchema } from './schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RefreshToken, RefreshTokenSchema } from './schemas/refresh-token.schema';
+import { ResetToken, ResetTokenSchema } from './schemas/reset-tokens.schema';
+import { MailService } from 'src/services/mail.services';
 
 @Module({
   imports: [
@@ -22,11 +24,15 @@ import { RefreshToken, RefreshTokenSchema } from './schemas/refresh-token.schema
       schema: UserSchema
     },
     {
+      name: ResetToken.name,
+      schema: ResetTokenSchema
+    },
+    {
       name: RefreshToken.name,
       schema: RefreshTokenSchema
     }
     ])],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, MailService],
 })
 export class AuthModule { }
