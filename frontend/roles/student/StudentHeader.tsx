@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { Box, HStack, IconButton, Text, Badge } from 'native-base';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import { Box, HStack, IconButton, Text, Badge } from "native-base";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
-const StudentHeader: React.FC<{ onSidebarToggle: () => void }> = ({ onSidebarToggle }) => {
+interface StudentHeaderProps {
+  onSidebarToggle: () => void;
+}
+
+const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle }) => {
   const [notificationCount, setNotificationCount] = useState(3); // Example notification count
 
   return (
@@ -15,16 +19,18 @@ const StudentHeader: React.FC<{ onSidebarToggle: () => void }> = ({ onSidebarTog
           _pressed={{ bg: "primary.600" }}
         />
 
-        {/* Content Title (e.g., Dashboard) */}
+        {/* Content Title */}
         <Text color="white" fontSize="lg" fontWeight="bold">
           Dashboard
         </Text>
 
         {/* Notification Icon */}
-        <Box>
+        <Box position="relative">
           <IconButton
-            icon={<MaterialIcons name="notifications" size={24} color="white" />}
-            onPress={() => console.log('Notification pressed')}
+            icon={
+              <MaterialIcons name="notifications" size={24} color="white" />
+            }
+            onPress={() => console.log("Notification pressed")}
             _pressed={{ bg: "primary.600" }}
           />
           {notificationCount > 0 && (
@@ -32,8 +38,8 @@ const StudentHeader: React.FC<{ onSidebarToggle: () => void }> = ({ onSidebarTog
               bg="red.600"
               rounded="full"
               position="absolute"
-              top={-1}
-              right={-1}
+              top={-2}
+              right={-2}
               zIndex={1}
               px={2}
               py={0}
