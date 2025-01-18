@@ -5,6 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { StudentModule } from './student/student.module';
+import { TeacherModule } from './teacher/teacher.module';
+import { AdminModule } from './admin/admin.module';
 import config from 'config/config';
 
 @Module({
@@ -31,7 +34,7 @@ import config from 'config/config';
         uri: configService.get<string>('database.user_db'),
       })
 
-    }), AuthModule],
+    }), AuthModule, StudentModule, TeacherModule, AdminModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-tokens.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
@@ -13,9 +12,9 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  @Post('signup')
-  async signUp(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.signup(createAuthDto);
+  @Post('register')
+  async signUp(@Body() createAuthDto: CreateUserDto) {
+    return this.authService.registerStudent(createAuthDto);
   }
 
   @Post('login')

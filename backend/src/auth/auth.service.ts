@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
@@ -12,6 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { nanoid } from 'nanoid';
 import { ResetToken } from './schemas/reset-tokens.schema';
 import { MailService } from 'src/services/mail.services';
+import { Student } from 'src/student/schemas/student.schema';
+import { StudentService } from 'src/student/student.service';
+import { CreateStudentDto } from 'src/student/dto/create-student.dto';
 uuidv4();
 
 
@@ -22,33 +24,42 @@ export class AuthService {
   constructor(
     private jwtSerivce: JwtService,
     private mailService: MailService,
+    private studentService: StudentService,
+    @InjectModel(User.name) private UserModel: Model<User & { _id: string }>,
+    @InjectModel(Student.name) private StudentModel: Model<Student>,
     @InjectModel(ResetToken.name) private ResetTokenModel: Model<ResetToken>,
-    @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(RefreshToken.name) private RefreshTokenModel: Model<RefreshToken>) { }
 
 
-  async signup(createAuthDto: CreateAuthDto) {
-    const { email, password, name, role } = createAuthDto
+  async registerStudent(createUserDto: CreateUserDto): Promise<any> {
+    const { name, email, password, role, batch, department } = createUserDto;
 
-    // Check if email is in use
-    const emailInUse = await this.UserModel.findOne({
-      email,
-    })
-
-    if (emailInUse) {
-      throw new BadRequestException("Email already in use");
+    // Ensure email is unique
+    const emailExists = await this.UserModel.findOne({ email });
+    if (emailExists) {
+      throw new BadRequestException('Email already in use');
     }
-    // Hash Password
-    const hashedPassword = await bcrypt.hash(password, 10); //123
 
-    await this.UserModel.create({
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the User
+    const user = await this.UserModel.create({
       name,
       email,
       password: hashedPassword,
-      role
+      role,
     });
 
-    return 'new user is Added';
+    // Delegate role-specific tasks
+    if (role === 'student') {
+      await this.studentService.createStudent(user._id, { batch });
+    }
+
+    return {
+      message: 'User successfully registered',
+      userId: user._id,
+    };
   }
 
   async login(credentials: LoginDto) {
