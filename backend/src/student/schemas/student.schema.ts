@@ -7,8 +7,12 @@ export class Student extends Document {
     @Prop({ required: true })
     batch: string
 
-    @Prop({ type: [String], default: [] })
-    timetable: string[];
+    @Prop({
+        type: Map,
+        of: Map,
+        default: () => new Map(),
+    })
+    timetable: Map<string, Map<string, string>>;
 
     // Will be deleted later if not needed. Added for testing
     @Prop({ type: [String], default: [] })
