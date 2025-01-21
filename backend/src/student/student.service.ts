@@ -3,8 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from '../auth/schemas/user.schema';
 import { Student } from './schemas/student.schema';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
-import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class StudentService {
@@ -26,6 +24,22 @@ export class StudentService {
     });
 
     return student.save();
+  }
+
+  async findStudentByEmail(email: string) {
+    const student = await this.studentModel
+      .findOne() // Perform a query on the Student collection
+      .populate({
+        path: 'user', // Join with the User collection
+        match: email,
+        select: 'name email role', // Specify which fields to return
+      });
+
+    if (!student || !student.user) {
+      throw new NotFoundException('Student with this email not found');
+    }
+
+    return student;
   }
 
 
@@ -107,5 +121,41 @@ export class TimetableService {
     }
 
     return rows;
+  }
+}
+
+// To Do List 
+
+export class ToDoListService {
+  constructor(
+    @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+  ) { }
+
+  async updateTimeTable(id: string, todolistData: string[]) {
+    // Check if the user exists
+    const student = await this.studentModel.findById(id);
+
+    if (!student) {
+      throw new NotFoundException("Student not found");
+    }
+
+    student.todo_list = todolistData;
+    await student.save();
+
+    return {
+      message: "To Do List Update Succesfully",
+      todoList: student.todo_list
+    }
+
+  }
+
+  async getToDoList(id: string) {
+    // Check if the student exists
+    const student = await this.studentModel.findById(id);
+    if (!student) throw new NotFoundException("student not found");
+
+    return {
+      todolist: student.todo_list
+    }
   }
 }

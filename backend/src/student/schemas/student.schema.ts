@@ -18,6 +18,9 @@ export class Student extends Document {
     @Prop({ type: [String], default: [] })
     events: string[];
 
+    @Prop({ type: [String], default: [] })
+    todo_list: string[];
+
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     user: Types.ObjectId;
 }
