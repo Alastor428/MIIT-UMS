@@ -1,8 +1,10 @@
 import React from "react";
 import { Box, Avatar, Text, VStack, Pressable } from "native-base";
+import { DrawerNavigationProp } from "@react-navigation/drawer";
+import { DrawerParamList } from "./navigationTypes"; // Ensure correct import
 
 interface SidebarProps {
-  navigation: any; // Pass navigation from React Navigation
+  navigation: DrawerNavigationProp<DrawerParamList>; // Correct type for navigation prop
 }
 
 const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
