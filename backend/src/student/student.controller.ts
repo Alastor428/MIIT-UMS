@@ -21,7 +21,5 @@ export class StudentController {
       student,
     };
   }
-
-
 }
 

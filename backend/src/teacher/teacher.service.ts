@@ -1,26 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTeacherDto } from './dto/create-teacher.dto';
-import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { CreateTeacherInput } from './inputs/createTeacher.input';
+import { ModifyResponse } from 'src/utils/constants/ModifyResponse.dto';
+import { CreateTeacher } from './operations/mutation/createTeacher';
 
 @Injectable()
 export class TeacherService {
-  create(createTeacherDto: CreateTeacherDto) {
-    return 'This action adds a new teacher';
-  }
-
-  findAll() {
-    return `This action returns all teacher`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} teacher`;
-  }
-
-  update(id: number, updateTeacherDto: UpdateTeacherDto) {
-    return `This action updates a #${id} teacher`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} teacher`;
+  constructor(
+    private readonly teacherCreate: CreateTeacher
+  ) {}
+  async createTeacher(
+    authId: string,
+    input: CreateTeacherInput
+  ): Promise<ModifyResponse> {
+    return await this.teacherCreate.createTeacher(authId, input)
   }
 }
