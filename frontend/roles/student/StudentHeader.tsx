@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, HStack, IconButton, Text, Badge } from "native-base";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface StudentHeaderProps {
   onSidebarToggle: () => void;
+  title: string; // Add a title prop
 }
 
-const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle }) => {
-  const [notificationCount, setNotificationCount] = useState(3); // Example notification count
-
+const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle, title }) => {
   return (
     <Box bg="gray.500" px={4} py={3}>
       <HStack justifyContent="space-between" alignItems="center">
@@ -21,19 +20,17 @@ const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle }) => {
 
         {/* Content Title */}
         <Text color="white" fontSize="lg" fontWeight="bold">
-          Dashboard
+          {title} {/* Render the title here */}
         </Text>
 
         {/* Notification Icon */}
         <Box position="relative">
           <IconButton
-            icon={
-              <MaterialIcons name="notifications" size={24} color="white" />
-            }
+            icon={<MaterialIcons name="notifications" size={24} color="white" />}
             onPress={() => console.log("Notification pressed")}
             _pressed={{ bg: "primary.600" }}
           />
-          {notificationCount > 0 && (
+          {3 > 0 && (
             <Badge
               bg="red.600"
               rounded="full"
@@ -46,7 +43,7 @@ const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle }) => {
               fontSize="xs"
               color="white"
             >
-              {notificationCount}
+              3
             </Badge>
           )}
         </Box>
