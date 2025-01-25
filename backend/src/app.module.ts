@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StudentModule } from './student/student.module';
 import { TeacherModule } from './teacher/teacher.module';
 import { AdminModule } from './admin/admin.module';
+import { BatchModule } from './batch/batch.module';
+import { CourseDetailsModule } from './course-details/course-details.module';
 import config from 'config/config';
 
 @Module({
@@ -34,7 +36,7 @@ import config from 'config/config';
         uri: configService.get<string>('database.user_db'),
       })
 
-    }), AuthModule, StudentModule, TeacherModule, AdminModule],
+    }), AuthModule, StudentModule, TeacherModule, AdminModule, BatchModule, CourseDetailsModule],
   controllers: [AppController],
   providers: [AppService],
 })
