@@ -1,10 +1,9 @@
 import React from "react";
 import { Box, Avatar, Text, VStack, Pressable } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { DrawerParamList } from "./navigationTypes"; // Ensure correct import
-
+import { DrawerParamList } from "./navigationTypes"; 
 interface SidebarProps {
-  navigation: DrawerNavigationProp<DrawerParamList>; // Correct type for navigation prop
+  navigation: DrawerNavigationProp<DrawerParamList>; 
 }
 
 const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
@@ -15,7 +14,7 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
         <Avatar
           size="xl"
           source={{
-            uri: "https://example.com/profile-pic.jpg", // Replace with actual profile pic URL
+            uri: "https://example.com/profile-pic.jpg", 
           }}
         />
         <Text fontSize="lg" fontWeight="bold" mt={3}>
@@ -26,7 +25,7 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
         </Text>
       </Box>
 
-      {/* Navigation Items */}
+      
       <VStack space={4}>
         <Pressable onPress={() => navigation.navigate("Dashboard")}>
           <Text fontSize="md">Dashboard</Text>

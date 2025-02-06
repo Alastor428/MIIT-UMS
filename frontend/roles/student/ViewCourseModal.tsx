@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Box, Text, Button } from "native-base";
 
-// ViewCourseModalProps interface for viewing course details
+
 interface ViewCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
