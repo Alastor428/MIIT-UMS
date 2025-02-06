@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { DrawerContentComponentProps } from "@react-navigation/drawer"; 
+import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { Box, Text } from "native-base";
 import Student_Sidebar from "./Student_Sidebar";
 import StudentHeader from "./StudentHeader";
 import Student_Timetable from "./Student_Timetable";
+import Student_Dashboard from "./Student_Dashboard";
 
-// Create Drawer Navigator
+
 const Drawer = createDrawerNavigator();
 
 const Screen: React.FC = ({ navigation }: any) => {
   useEffect(() => {
     navigation.setOptions({
-      title: "Dashboard", // Set the title when on Dashboard screen
+      title: "Dashboard",
     });
   }, [navigation]);
 
@@ -36,7 +37,7 @@ const Student_Layout: React.FC = () => {
     >
       <Drawer.Screen
         name="Dashboard"
-        component={Screen}
+        component={Student_Dashboard}
         options={({ navigation }) => ({
           header: () => (
             <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Dashboard" />
