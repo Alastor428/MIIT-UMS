@@ -10,6 +10,7 @@ import { TeacherModule } from './teacher/teacher.module';
 import { AdminModule } from './admin/admin.module';
 import { BatchModule } from './batch/batch.module';
 import { CourseDetailsModule } from './course-details/course-details.module';
+import { EventModule } from './event/event.module';
 import config from 'config/config';
 
 @Module({
@@ -36,7 +37,7 @@ import config from 'config/config';
         uri: configService.get<string>('database.user_db'),
       })
 
-    }), AuthModule, StudentModule, TeacherModule, AdminModule, BatchModule, CourseDetailsModule],
+    }), AuthModule, StudentModule, TeacherModule, AdminModule, BatchModule, CourseDetailsModule, EventModule],
   controllers: [AppController],
   providers: [AppService],
 })

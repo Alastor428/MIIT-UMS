@@ -7,6 +7,9 @@ export class Student extends Document {
     @Prop({ required: true })
     batch: string;
 
+    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+    user: Types.ObjectId;
+
     @Prop({
         type: Map,
         of: Map,
@@ -23,8 +26,6 @@ export class Student extends Document {
     @Prop({ type: [ToDoListDto], default: [] })
     todo_list: ToDoListDto[];
 
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-    user: Types.ObjectId;
 }
 
 

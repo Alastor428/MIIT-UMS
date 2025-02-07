@@ -1,5 +1,5 @@
-import { IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from "class-validator";
-import { User, UserRole } from "../schemas/user.schema";
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from "class-validator";
+import { Gender, User, UserRole } from "../schemas/user.schema";
 
 export class CreateUserDto {
     @IsString()
@@ -16,6 +16,9 @@ export class CreateUserDto {
     @IsEnum(UserRole)
     role: UserRole;
 
+    @IsEnum(Gender)
+    gender: Gender;
+
     @IsOptional()
     @IsString()
     batch?: string;
@@ -23,4 +26,8 @@ export class CreateUserDto {
     @IsOptional()
     @IsString()
     department?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isHOD?: boolean;
 }

@@ -9,6 +9,7 @@ import { RefreshToken, RefreshTokenSchema } from './schemas/refresh-token.schema
 import { ResetToken, ResetTokenSchema } from './schemas/reset-tokens.schema';
 import { MailService } from 'src/services/mail.services';
 import { StudentModule } from 'src/student/student.module';
+import { TeacherModule } from 'src/teacher/teacher.module';
 
 @Module({
   imports: [
@@ -32,9 +33,8 @@ import { StudentModule } from 'src/student/student.module';
       name: RefreshToken.name,
       schema: RefreshTokenSchema
     },
-    { name: ResetToken.name, schema: ResetTokenSchema },
-    { name: RefreshToken.name, schema: RefreshTokenSchema },
-    ]), forwardRef(() => StudentModule)],
+
+    ]), forwardRef(() => StudentModule), forwardRef(() => TeacherModule)],
   controllers: [AuthController],
   providers: [AuthService, MailService],
   exports: [

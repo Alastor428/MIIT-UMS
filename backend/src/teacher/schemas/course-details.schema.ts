@@ -10,16 +10,10 @@ export class CourseDetails extends Document {
     courseName: string;
 
     @Prop()
-    instructor: string;
-
-    @Prop()
     room: string;
 
     @Prop()
     credit: number;
-
-    @Prop()
-    faculty: string;
 
     @Prop()
     note: string;

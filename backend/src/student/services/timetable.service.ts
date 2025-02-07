@@ -8,7 +8,6 @@ import { AddCourseToTimetableDto } from '../dto/timetable.dto';
 @Injectable()
 export class TimetableService {
     constructor(
-        @InjectModel(CourseDetails.name) private courseModel: Model<CourseDetails>,
         @InjectModel(Student.name) private readonly studentModel: Model<Student>,
     ) { }
 
@@ -22,8 +21,14 @@ export class TimetableService {
         if (!student) {
             throw new NotFoundException('Student not found');
         }
-        let course = student.course_details.find((c) => c.courseCode === courseCode);
 
+        // Ensure timetable is initialized as a Map
+        if (!student.timetable) {
+            student.timetable = new Map<string, Map<string, string>>();
+        }
+
+        // Find or create the course in course_details
+        let course = student.course_details.find((c) => c.courseCode === courseCode);
         if (!course) {
             course = {
                 _id: new Types.ObjectId(),
@@ -38,22 +43,24 @@ export class TimetableService {
             student.course_details.push(course);
         }
 
-
-        if (!student.timetable) {
-            student.timetable = new Map<string, Map<string, string>>();
-        }
-
+        // Initialize the day map if it doesn't exist
         let dayMap = student.timetable.get(day);
         if (!dayMap) {
             dayMap = new Map<string, string>();
             student.timetable.set(day, dayMap);
         }
 
+        // Add the course to the timetable
         dayMap.set(time, course._id.toString());
+        student.timetable.set(day, dayMap); // Re-set to trigger change tracking
 
+        // Mark the timetable field as modified
         student.markModified('timetable');
 
+        // Save the updated student document
         await student.save();
+
+        console.log(student.timetable)
 
         return {
             message: 'Course added to timetable successfully',
@@ -61,18 +68,28 @@ export class TimetableService {
         };
     }
 
+
     // Edit course
     async editCourse(
         studentId: string,
-        courseId: string,
+        oldCourseCode: string,
         updatedData: Partial<CourseDetails>,
     ) {
         const student = await this.studentModel.findById(studentId);
         if (!student) {
             throw new NotFoundException('Student not found');
         }
+        var courseId = null;
+        const oldCourse = student.course_details
+        for (let index = 0; index < oldCourse.length; index++) {
+            const oldcourseId = oldCourse[index];
+            if (oldcourseId.courseCode === oldCourseCode) {
+                courseId = oldcourseId._id;
+                break;
+            }
+        }
 
-        const course = student.course_details.find((c) => c._id.toString() === courseId);
+        const course = student.course_details.find((c) => c._id === courseId);
         if (!course) {
             throw new NotFoundException('Course not found');
         }
@@ -85,6 +102,7 @@ export class TimetableService {
             message: 'Course updated successfully',
             course,
         };
+
     }
 
     // Delete courses
@@ -117,6 +135,7 @@ export class TimetableService {
     }
 
 
+    // Get student time table
     async getStudentTimetable(studentId: string) {
         const student = await this.studentModel.findById(studentId);
         if (!student) {
@@ -359,6 +378,7 @@ export class TimetableService {
         }
 
         dayMap.set(time, course._id.toString());
+        student.timetable.set(day, dayMap);
 
         student.markModified('timetable');
 

@@ -11,8 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { nanoid } from 'nanoid';
 import { ResetToken } from './schemas/reset-tokens.schema';
 import { MailService } from 'src/services/mail.services';
-import { Student } from 'src/student/schemas/student.schema';
 import { StudentService } from 'src/student/student.service';
+import { TeacherService } from 'src/teacher/teacher.service';
+import { CreateTeacherDto } from 'src/teacher/dto/create-teacher.dto';
 import { CreateStudentDto } from 'src/student/dto/create-student.dto';
 uuidv4();
 
@@ -25,14 +26,19 @@ export class AuthService {
     private jwtSerivce: JwtService,
     private mailService: MailService,
     private studentService: StudentService,
+    private teacherService: TeacherService,
     @InjectModel(User.name) private UserModel: Model<User & { _id: string }>,
-    @InjectModel(Student.name) private StudentModel: Model<Student>,
     @InjectModel(ResetToken.name) private ResetTokenModel: Model<ResetToken>,
     @InjectModel(RefreshToken.name) private RefreshTokenModel: Model<RefreshToken>) { }
 
 
-  async registerStudent(createUserDto: CreateUserDto): Promise<any> {
-    const { name, email, password, role, batch, department } = createUserDto;
+  async register(createUserDto: CreateUserDto): Promise<any> {
+    const { name, email, password, role, batch, department, isHOD, gender } = createUserDto;
+
+
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
 
     // Ensure email is unique
     const emailExists = await this.UserModel.findOne({ email });
@@ -49,11 +55,28 @@ export class AuthService {
       email,
       password: hashedPassword,
       role,
+      gender,
     });
+
 
     // Delegate role-specific tasks
     if (role === 'student') {
-      await this.studentService.createStudent(user._id, { batch });
+
+      const studentData: CreateStudentDto = {
+        batch,
+      }
+      await this.studentService.createStudent(user._id, studentData);
+    }
+    else if (role == 'teacher') {
+      if (!department) {
+        throw new BadRequestException('Department is required for teachers');
+      }
+      const teacherData: CreateTeacherDto = {
+        department,
+        isHOD: isHOD || false,
+      };
+
+      await this.teacherService.createTeacher(user._id, teacherData);
     }
 
     return {

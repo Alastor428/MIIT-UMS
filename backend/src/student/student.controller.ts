@@ -30,14 +30,34 @@ export class StudentController {
   }
 
   @Get('get-student')
-  async findOneStudent(@Body() email: string) {
+  async findOneStudent(@Body('email') email: string) {
     const studentData = await this.studentService.findStudentByEmail(email);
     return studentData;
+  }
+
+  @Delete(':id')
+  async deleteStudent(@Param('id') studentId: string) {
+    const deletedStudent = await this.studentService.deleteStudent(studentId);
+    return {
+      message: 'Student deleted successfully',
+      student: deletedStudent,
+    };
+  }
+
+  @Get('all')
+  async getAllStudents() {
+    const students = await this.studentService.getAllStudents();
+    return {
+      message: 'All students retrieved successfully',
+      count: students.length,
+      students,
+    };
   }
 
 
   // Time Table
 
+  // Add course to the timetable
   @Post(':studentId/timetable')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async addCourseToTimetable(
@@ -131,6 +151,7 @@ export class StudentController {
     return await this.timetableService.deleteTimetableCell(studentId, day, time);
   }
 
+  // Add existing course to the timetable
   @Post(':studentId/timetable/cell')
   async addExistingCourseToTimetable(
     @Param('studentId') studentId: string,

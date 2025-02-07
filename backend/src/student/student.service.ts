@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from '../auth/schemas/user.schema';
@@ -23,23 +23,44 @@ export class StudentService {
       ...data,
     });
 
-    return student.save();
+    try {
+      return student.save();
+
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async findStudentByEmail(email: string) {
+    const user = await this.authModel.findOne({ email }).exec();
+    if (!user) {
+      throw new NotFoundException("There is no user with this email")
+    }
     const student = await this.studentModel
-      .findOne() // Perform a query on the Student collection
+      .findOne({ user: user._id }) // Perform a query on the Student collection
       .populate({
         path: 'user', // Join with the User collection
-        match: email,
         select: 'name email role', // Specify which fields to return
       });
-
-    if (!student || !student.user) {
+    if (!student) {
       throw new NotFoundException('Student with this email not found');
     }
 
     return student;
+  }
+
+  // delete a student document
+  async deleteStudent(studentId: string) {
+    const deletedStudent = await this.studentModel.findByIdAndDelete(studentId);
+    if (!deletedStudent) {
+      throw new NotFoundException(`Student with ID ${studentId} not found`);
+    }
+    return deletedStudent;
+  }
+
+  // get all students
+  async getAllStudents(): Promise<Student[]> {
+    return this.studentModel.find().exec();
   }
 }
 
