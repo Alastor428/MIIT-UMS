@@ -10,20 +10,15 @@ interface StudentHeaderProps {
 const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle, title }) => {
   return (
     <Box bg="gray.500" px={4} py={3}>
-      <HStack justifyContent="space-between" alignItems="center">
-        {/* Sidebar Toggle Icon */}
+      <HStack justifyContent="space-between" alignItems="center">        
         <IconButton
           icon={<Ionicons name="menu" size={24} color="white" />}
           onPress={onSidebarToggle}
           _pressed={{ bg: "primary.600" }}
-        />
-
-        {/* Content Title */}
+        />        
         <Text color="white" fontSize="lg" fontWeight="bold">
-          {title} {/* Render the title here */}
-        </Text>
-
-        {/* Notification Icon */}
+          {title} 
+        </Text>      
         <Box position="relative">
           <IconButton
             icon={<MaterialIcons name="notifications" size={24} color="white" />}
