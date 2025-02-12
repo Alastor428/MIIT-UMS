@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, NotFoundException, ValidationPipe, UsePipes } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { ToDoListService } from './services/todolist.service';
-import { TimetableService } from './services/timetable.service';
-import { AddCourseToTimetableDto } from './dto/timetable.dto';
+import { ToDoListService } from './services/student-todolist.service';
+import { TimetableService } from './services/student-timetable.service';
+import { AddCourseToTimetableDto } from './dto/student-timetable.dto';
 import { UpdateCourseAndTimetableDto } from './dto/update-course-timetable.dto';
 import { ToDoListDto } from './dto/todolist.dto';
 
@@ -13,6 +13,7 @@ export class StudentController {
     private readonly toDoListService: ToDoListService,
   ) { }
 
+  // Create Student
   @Post('create/:userId')
   async createStudent(
     @Param('userId') userId: string, // Get the userId from the route parameter
@@ -29,12 +30,14 @@ export class StudentController {
     };
   }
 
+  // Get student
   @Get('get-student')
   async findOneStudent(@Body('email') email: string) {
     const studentData = await this.studentService.findStudentByEmail(email);
     return studentData;
   }
 
+  // Delete Student
   @Delete(':id')
   async deleteStudent(@Param('id') studentId: string) {
     const deletedStudent = await this.studentService.deleteStudent(studentId);
@@ -44,11 +47,27 @@ export class StudentController {
     };
   }
 
+  // Get all students
   @Get('all')
   async getAllStudents() {
     const students = await this.studentService.getAllStudents();
     return {
       message: 'All students retrieved successfully',
+      count: students.length,
+      students,
+    };
+  }
+
+  // Get student by batch
+  @Get(':batch')
+  async getStudentsByBatch(@Param('batch') batch: string) {
+    const students = await this.studentService.getStudentsByBatch(batch);
+
+    if (!students || students.length === 0) {
+      throw new NotFoundException(`No students found for batch: ${batch}`);
+    }
+    return {
+      message: `Students retrieved for batch: ${batch}`,
       count: students.length,
       students,
     };

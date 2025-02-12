@@ -29,4 +29,4 @@ export class Student extends Document {
 }
 
 
-export const studentSchema = SchemaFactory.createForClass(Student)
+export const studentSchema = SchemaFactory.createForClass(Student);

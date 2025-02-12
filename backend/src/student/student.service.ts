@@ -62,6 +62,11 @@ export class StudentService {
   async getAllStudents(): Promise<Student[]> {
     return this.studentModel.find().exec();
   }
+
+  // get student by batch
+  async getStudentsByBatch(batch: string) {
+    return this.studentModel.find({ batch }).exec();
+  }
 }
 
 

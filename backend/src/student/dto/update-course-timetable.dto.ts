@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty } from "class-validator";
-import { AddCourseToTimetableDto } from "./timetable.dto";
+import { AddCourseToTimetableDto } from "./student-timetable.dto";
 
 export class UpdateCourseAndTimetableDto {
     @IsString()

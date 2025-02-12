@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as fs from 'fs';
+import * as csv from 'csv-parser';
 import { BatchTimeTable } from './schemas/batchTimeTable.schema';
 import { CourseDetails } from 'src/student/schemas/course.schema';
 
@@ -16,9 +18,6 @@ export class BatchTimetableService {
     timetableData: Array<{ time: string;[day: string]: any }>,
     courseDetails: any[],
   ) {
-    console.log('Incoming Timetable Data:', timetableData);
-    console.log('Incoming Course Details:', courseDetails);
-
     // Find or create the batch timetable
     let batchTimetable = await this.batchTimetableModel.findOne({ batch });
     if (!batchTimetable) {
@@ -34,7 +33,7 @@ export class BatchTimetableService {
     // Update the timetable
     for (const row of timetableData) {
       const { time, ...days } = row;
-      const timetableRow: any = { time };
+      const timetableRow: any = { time }; // Ensure time is included
 
       for (const [day, courseDetailsForSlot] of Object.entries(days)) {
         if (courseDetailsForSlot) {
@@ -58,8 +57,6 @@ export class BatchTimetableService {
       _id: new Types.ObjectId(course._id), // Ensure _id is a valid ObjectId
     }));
 
-    console.log('Batch Timetable Before Saving:', batchTimetable);
-
     // Save the batch timetable
     await batchTimetable.save();
 
@@ -68,7 +65,6 @@ export class BatchTimetableService {
       batchTimetable,
     };
   }
-
 
   async getBatchTimetable(batch: string) {
     // Find the batch timetable
@@ -100,4 +96,73 @@ export class BatchTimetableService {
       course_details: batchTimetable.course_details,
     };
   }
+
+  // SUCCESS:
+  async processAndSortTimetableFromCSV(filePath: string): Promise<{ timetable: any[]; course_details: any[] }> {
+    const timetableData: Array<{ time: string;[day: string]: any }> = [];
+    const courseDetailsMap = new Map<string, any>();
+    const csvRows: any[] = []; // Store all rows temporarily
+
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (row) => {
+          const trimmedRow = Object.keys(row).reduce((acc, key) => {
+            acc[key.trim()] = row[key]?.trim(); // Trim keys and values
+            return acc;
+          }, {} as any);
+
+          csvRows.push(trimmedRow); // Store the row for later processing
+
+          // Extract course details
+          const { courseCode, courseName, instructor, room, credit, faculty, note } = trimmedRow;
+          if (courseCode) {
+            const normalizedCourseCode = courseCode.trim(); // Normalize course code
+            if (!courseDetailsMap.has(normalizedCourseCode)) {
+              courseDetailsMap.set(normalizedCourseCode, {
+                courseCode,
+                courseName,
+                instructor,
+                room,
+                credit: parseInt(credit, 10),
+                faculty,
+                note,
+                _id: new Types.ObjectId(), // Generate a new ObjectId for the course
+              });
+            }
+          }
+        })
+        .on('end', () => {
+          // Now process timetable data using stored course details
+          csvRows.forEach((trimmedRow) => {
+            const { time } = trimmedRow;
+            const timetableEntry: any = { time };
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+            days.forEach(day => {
+              const courseCode = trimmedRow[day]?.trim(); // Get the course code from the day column
+              timetableEntry[day] = courseCode ? courseDetailsMap.get(courseCode) : null; // Lookup the course
+            });
+
+            timetableData.push(timetableEntry);
+          });
+
+          // Sort the timetable data by time
+          timetableData.sort((a, b) => {
+            const timeA = a.time ? a.time.split(':').map(Number) : [0, 0]; // Default to [0, 0] if time is invalid
+            const timeB = b.time ? b.time.split(':').map(Number) : [0, 0]; // Default to [0, 0] if time is invalid
+            return timeA[0] - timeB[0] || timeA[1] - timeB[1];
+          });
+
+          // Convert courseDetailsMap to an array
+          const courseDetails = Array.from(courseDetailsMap.values());
+
+          resolve({ timetable: timetableData, course_details: courseDetails });
+        })
+        .on('error', (error) => {
+          reject(error);
+        });
+    });
+  }
+
 }

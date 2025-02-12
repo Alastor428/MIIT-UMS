@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Student } from '../schemas/student.schema';
 import { CourseDetails } from 'src/course-details/schemas/course-details.schema';
-import { AddCourseToTimetableDto } from '../dto/timetable.dto';
+import { AddCourseToTimetableDto } from '../dto/student-timetable.dto';
 
 @Injectable()
 export class TimetableService {
