@@ -4,7 +4,7 @@ import { ModifyResponse } from 'src/utils/constants/ModifyResponse.dto';
 import { CreateTeacher } from './operations/mutation/createTeacher';
 import { GetAllTeachers } from './operations/query/getAllTeachers';
 import { GetAllTeachersDto } from './dto/getAllTeachers.dto';
-import { Teacher } from './models/teacher.model';
+import { Teacher } from './models/teacher.schema';
 import { GetTeacher } from './operations/query/getTeacher';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

@@ -60,8 +60,6 @@ export class TimetableService {
         // Save the updated student document
         await student.save();
 
-        console.log(student.timetable)
-
         return {
             message: 'Course added to timetable successfully',
             course,
@@ -177,7 +175,6 @@ export class TimetableService {
 
                 // Find the course details for the course ID
                 const course = courseDetails.find((c) => c._id.toString() === courseId);
-
                 // Add the course (or null if no course exists) to the row
                 row[day] = course || null;
             }
@@ -266,24 +263,39 @@ export class TimetableService {
         // Step 1: Update course_details
         for (const courseDetail of course_details) {
             const existingCourse = student.course_details.find(
-                (c) => c._id.toString() === courseDetail._id,
+                (c) => c.courseCode.trim() === courseDetail.courseCode.trim() &&
+                    c._id === courseDetail._id
             );
 
             if (!existingCourse) {
+                var oldCourse = student.course_details.find((c) => c.courseCode.trim() === courseDetail.courseCode.trim())
                 // Create a new course document using the CourseDetails schema
-                const newCourse = {
-                    _id: new Types.ObjectId(courseDetail._id),
-                    courseCode: courseDetail.courseCode,
-                    courseName: courseDetail.courseName,
-                    instructor: courseDetail.instructor,
-                    room: courseDetail.room,
-                    credit: courseDetail.credit,
-                    faculty: courseDetail.faculty,
-                    note: courseDetail.note,
-                };
+                if (!oldCourse) {
+                    const newCourse = {
+                        _id: courseDetail._id,
+                        courseCode: courseDetail.courseCode,
+                        courseName: courseDetail.courseName,
+                        instructor: courseDetail.instructor,
+                        room: courseDetail.room,
+                        credit: courseDetail.credit,
+                        faculty: courseDetail.faculty,
+                        note: courseDetail.note,
+                    };
+                    student.course_details.push(newCourse as any);
+                }
+                else {
 
-                // Add the new course to the student's course_details array
-                student.course_details.push(newCourse as any); // Cast to any to avoid TypeScript errors
+                    oldCourse._id = courseDetail._id,
+                        oldCourse.courseCode = courseDetail.courseCode,
+                        oldCourse.courseName = courseDetail.courseName,
+                        oldCourse.instructor = courseDetail.instructor,
+                        oldCourse.room = courseDetail.room,
+                        oldCourse.credit = courseDetail.credit,
+                        oldCourse.faculty = courseDetail.faculty,
+                        oldCourse.note = courseDetail.note
+
+                }
+
             }
         }
 
@@ -295,7 +307,7 @@ export class TimetableService {
             const updateDayTimetable = (day: string, course: any) => {
                 if (course) {
                     const dayMap = student.timetable.get(day) || new Map<string, string>();
-                    dayMap.set(time, course._id);
+                    dayMap.set(time, course._id.toString());
                     student.timetable.set(day, dayMap);
                 }
             };

@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/auth/schemas/user.schema';
-import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.model';
+import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.schema';
 import { CreateTeacherDto } from 'src/teacher/dto/create-teacher.dto';
 import { ModifyResponse } from 'src/utils/constants/ModifyResponse.dto';
 

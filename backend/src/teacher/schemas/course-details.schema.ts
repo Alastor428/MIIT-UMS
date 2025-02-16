@@ -10,6 +10,9 @@ export class CourseDetails extends Document {
     courseName: string;
 
     @Prop()
+    batch: string;
+
+    @Prop()
     room: string;
 
     @Prop()

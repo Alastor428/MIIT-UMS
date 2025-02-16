@@ -63,7 +63,7 @@ export class StudentService {
     return this.studentModel.find().exec();
   }
 
-  // get student by batch
+  // Get all students by batch
   async getStudentsByBatch(batch: string) {
     return this.studentModel.find({ batch }).exec();
   }

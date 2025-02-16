@@ -19,6 +19,10 @@ export class AddCourseToTimetableDto {
 
     @IsString()
     @IsNotEmpty()
+    batch: string;
+
+    @IsString()
+    @IsNotEmpty()
     room: string;
 
     @IsNumber()

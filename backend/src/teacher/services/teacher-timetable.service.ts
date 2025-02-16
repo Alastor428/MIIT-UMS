@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Teacher } from '../models/teacher.model';
+import { Teacher } from '../models/teacher.schema';
 import { CourseDetails } from '../schemas/course-details.schema';
 import { AddCourseToTimetableDto } from '../dto/teacher-timetable.dto';
 
@@ -16,7 +16,7 @@ export class TeacherTimetableService {
         teacherId: string,
         timetableData: AddCourseToTimetableDto,
     ) {
-        const { day, time, courseCode, courseName, room, credit, note } = timetableData;
+        const { day, time, courseCode, courseName, batch, room, credit, note } = timetableData;
         const teacher = await this.teacherModel.findById(teacherId);
         if (!teacher) {
             throw new NotFoundException('teacher not found');
@@ -28,6 +28,7 @@ export class TeacherTimetableService {
                 _id: new Types.ObjectId(),
                 courseCode,
                 courseName,
+                batch,
                 room,
                 credit,
                 note,
@@ -292,5 +293,110 @@ export class TeacherTimetableService {
             message: `Course ${courseCode} added to timetable for ${day} at ${time}`,
             timetable: teacher.timetable,
         };
+    }
+
+
+
+    async addMultipleTimetableEntries(
+        batch: string, courseDetailsForTeachers: any[], timetableData: any[]
+    ): Promise<{ message: string }> {
+        // Method to update teacher timetables based on the courses they teach
+        console.log('Timetable Data Passed : ', timetableData)
+        // Create a mapping of courseCode to _id
+        const courseCodeToIdMap = new Map<string, Types.ObjectId>();
+        for (const course of courseDetailsForTeachers) {
+            courseCodeToIdMap.set(course.courseCode.trim(), course._id);
+        }
+
+        for (const course of courseDetailsForTeachers) {
+            // Find teachers by instructor name
+            const teachers = await this.findTeachersByName(course.instructor);
+            course.batch = batch;
+
+            for (const teacher of teachers) {
+                // Find the course in the teacher's course_details by courseCode and batch
+                const existingCourse = teacher.course_details.find(
+                    (c) =>
+                        c.courseCode.trim() === course.courseCode.trim() &&
+                        c.batch === course.batch
+                );
+
+                // If the course exists, update its _id
+                if (existingCourse) {
+                    existingCourse._id = courseCodeToIdMap.get(course.courseCode.trim());
+                    existingCourse.courseName = course.courseName;
+                    existingCourse.room = course.room;
+                    existingCourse.credit = course.credit;
+                    existingCourse.note = course.note;
+                } else {
+                    const newCourse = {
+                        _id: courseCodeToIdMap.get(course.courseCode.trim()), // Use the new _id from the map
+                        courseCode: course.courseCode,
+                        courseName: course.courseName,
+                        batch: course.batch,
+                        room: course.room,
+                        credit: course.credit,
+                        note: course.note,
+                    } as CourseDetails;
+                    teacher.course_details.push(newCourse);
+                }
+                console.log('Passed:', teacher.course_details)
+
+                // Update the teacher's timetable
+                for (const timetableEntry of timetableData) {
+                    const { time, Monday, Tuesday, Wednesday, Thursday, Friday } = timetableEntry;
+
+                    // Helper function to update a specific day's timetable
+                    const updateDayTimetable = (day: string, course: any) => {
+                        const dayMap = teacher.timetable.get(day) || new Map<string, string>();
+                        if (course) {
+                            var teacherCourse = teacher.course_details.find((c) => c._id.toString() === course.toString())
+                            if (teacherCourse) {
+                                console.log("Course Id to be added : ", teacherCourse._id.toString())
+                                dayMap.set(time, teacherCourse._id.toString());
+                                teacher.timetable.set(day, dayMap);
+                            }
+                        }
+                    };
+
+                    // Update timetable for each day based on the course mapping
+                    updateDayTimetable('Monday', Monday);
+                    updateDayTimetable('Tuesday', Tuesday);
+                    updateDayTimetable('Wednesday', Wednesday);
+                    updateDayTimetable('Thursday', Thursday);
+                    updateDayTimetable('Friday', Friday);
+                }
+
+                // Mark the timetable and course_details as modified
+                teacher.markModified('timetable');
+                teacher.markModified('course_details');
+
+                // Save the updated teacher document
+                await teacher.save();
+            }
+        }
+
+        return { message: 'Teacher timetable and course details updated successfully' };
+    }
+
+    // Find teachers who teach a specific course
+    async findTeachersByCourse(courseCode: string): Promise<Teacher[]> {
+        return this.teacherModel.find({ courses: courseCode }).exec();
+    }
+
+    // Find teachers who have a specific course in their `course_details` array
+    async findTeachersByCourseDetails(courseCode: string): Promise<Teacher[]> {
+        return this.teacherModel.find({ 'course_details.courseCode': courseCode }).exec();
+    }
+
+    async findTeachersByName(name: string): Promise<Teacher[]> {
+        return await this.teacherModel.find({})
+            .populate({
+                path: 'user',
+                match: { name: name },
+                select: name
+            })
+            .exec()
+            .then((teachers) => teachers.filter((teacher) => teacher.user)); // Assuming `user.name` stores the teacher's name
     }
 }

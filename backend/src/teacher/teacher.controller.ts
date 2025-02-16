@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, Qu
 import { TeacherService } from './teacher.service';
 import { ModifyResponse } from 'src/utils/constants/ModifyResponse.dto';
 import { GetAllTeachersDto } from './dto/getAllTeachers.dto';
-import { Teacher } from './models/teacher.model';
+import { Teacher } from './models/teacher.schema';
 import { TeacherTimetableService } from './services/teacher-timetable.service';
 import { TeacherUpdateCourseAndTimetableDto } from './dto/teacher-update-course-timetable.dto';
 import { TeacherToDoListDto } from './dto/teacherToDoList.dto';
@@ -60,7 +60,7 @@ export class TeacherController {
 
   // Time Table
 
-  //SUCCESS: Add a course to the table
+  // Add a course to the table
   @Post(':teacherId/timetable')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async addCourseToTimetable(
@@ -70,14 +70,14 @@ export class TeacherController {
     const result = await this.timetableService.addCourseToTimetable(teacherId, timetableData);
     return result;
   }
-  //SUCCESS: Get a teacher's timetable
+  // Get a teacher's timetable
   @Get(':teacherId/timetable')
   async getStudentTimetable(@Param('teacherId') teacherId: string) {
     const timetable = await this.timetableService.getTeacherTimetable(teacherId);
     return timetable;
   };
 
-  //SUCCESS: Update a course and its references in the timetable
+  // Update a course and its references in the timetable
   @Put('update-course/:teacherId')
   async updateCourseAndTimetable(
     @Param('teacherId') teacherId: string,
@@ -94,7 +94,7 @@ export class TeacherController {
     };
   }
 
-  //SUCCESS: Reset a teacher's timetable
+  // Reset a teacher's timetable
   @Patch(':teacherId/reset')
   async resetTimetable(@Param('teacherId') teacherId: string) {
     const response = await this.timetableService.resetTimetable(teacherId);

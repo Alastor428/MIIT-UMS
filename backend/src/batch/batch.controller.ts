@@ -1,8 +1,9 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { BatchTimetableService } from './batch.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from "multer"
+import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('batch-timetable')
 export class BatchTimetableController {
@@ -20,7 +21,8 @@ export class BatchTimetableController {
       batch,
       'createdByUserId', // Replace with the actual createdBy user ID
       timetable,
-      course_details,
+      course_details, // Course details for students
+      [], // Empty array for teacher course details (not used for students)
     );
   }
 
@@ -43,22 +45,32 @@ export class BatchTimetableController {
   }))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Query('batch') batchName: string,  // Extract batch from query
-    @Query('createdBy') createdByUserId: string,  // Extract createdBy from query
+    @Query('createdBy') createdByUserId: string, // Extract createdBy from query
   ) {
-    if (!batchName || !createdByUserId) {
-      throw new BadRequestException('Both batch and createdBy query parameters are required.');
+    if (!createdByUserId) {
+      throw new BadRequestException('The createdBy query parameter is required.');
     }
 
     const filePath = file.path;
-    const { timetable, course_details } = await this.batchTimetableService.processAndSortTimetableFromCSV(filePath);
+    const batchTimetableData = await this.batchTimetableService.processAndSortTimetableFromCSV(filePath);
 
-    // Call the upsertBatchTimetable method to save the processed data
-    return this.batchTimetableService.upsertBatchTimetable(
-      batchName,
-      createdByUserId,
-      timetable,
-      course_details,
-    );
+    // Upsert timetable for each batch
+    const results = [];
+    for (const [batch, data] of Object.entries(batchTimetableData)) {
+      const result = await this.batchTimetableService.upsertBatchTimetable(
+        batch,
+        createdByUserId,
+        data.timetable,
+        data.course_details, // Student course details
+        data.teacher_course_details, // Teacher course details (now separated)
+      );
+      results.push(result);
+    }
+
+    return {
+      message: 'Batch timetables updated successfully',
+      results,
+    };
   }
+
 }

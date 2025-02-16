@@ -1,14 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.model';
+import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.schema';
 import { GetAllTeachersDto } from 'src/teacher/dto/getAllTeachers.dto';
 
 @Injectable()
 export class GetAllTeachers {
   constructor(
     @InjectModel(Teacher.name) private teacherModal: Model<TeacherDocument>,
-  ) {}
+  ) { }
 
   async getAllTeachers(
     authId: string,

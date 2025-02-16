@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.model';
+import { Teacher, TeacherDocument } from 'src/teacher/models/teacher.schema';
 import { User } from 'src/auth/schemas/user.schema';
 
 @Injectable()

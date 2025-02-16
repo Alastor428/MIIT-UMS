@@ -3,7 +3,7 @@ import { TeacherService } from './teacher.service';
 import { TeacherController } from './teacher.controller';
 import { CreateTeacher } from './operations/mutation/createTeacher';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Teacher, TeacherSchema } from './models/teacher.model';
+import { Teacher, TeacherSchema } from './models/teacher.schema';
 import { GetAllTeachers } from './operations/query/getAllTeachers';
 import { GetTeacher } from './operations/query/getTeacher';
 import { AuthModule } from 'src/auth/auth.module';

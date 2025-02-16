@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Teacher } from '../models/teacher.model';
+import { Teacher } from '../models/teacher.schema';
 import { TeacherToDoListDto } from '../dto/teacherToDoList.dto';
 // To Do List 
 export class TeacherToDoListService {

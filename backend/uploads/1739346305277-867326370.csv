@@ -1,0 +1,7 @@
+﻿time ,Monday,Tuesday,Wednesday,Thursday,Friday,courseCode,courseName,credit,room,faculty,note,batch
+9:00-9:50,CSE 101,CSE  102,Math 101,CSE 101,Math 101,CSE 101,C Progarmming,3,201,CT,,2021-S1
+10:00-10:50,CSE 101,Math 101,CSE 102,Math 101,CSE101,Math 101,Linear Algebra,4,202,Math,,
+,,,,,,CSE 102,Web,4,201,CT,,
+9:00-9:50,CSE 102,CSE 101,Math 101 ,CSE 102,Math 101,CSE 101,C Progarmming,3,202,CT,,2021-S2
+,,,,,,CSE 201,Web,4,202,CT,,
+,,,,,,Math 101,Linear Algebra,4,201,Math,,
