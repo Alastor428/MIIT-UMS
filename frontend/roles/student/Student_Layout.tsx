@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { DrawerContentComponentProps } from "@react-navigation/drawer"; 
+import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { Box, Text } from "native-base";
+import Student_Dashboard from "./Student_Dashboard";
 import Student_Sidebar from "./Student_Sidebar";
 import StudentHeader from "./StudentHeader";
 import Student_Timetable from "./Student_Timetable";
+import Student_ToDoList from "./Student_ToDoList";
+import Student_Event from "./Student_Event";
 
 // Create Drawer Navigator
 const Drawer = createDrawerNavigator();
@@ -18,7 +21,7 @@ const Screen: React.FC = ({ navigation }: any) => {
 
   return (
     <Box flex={1} justifyContent="center" alignItems="center">
-      <Text fontSize="lg"> </Text>
+      <Text fontSize="lg">Screen Content</Text>
     </Box>
   );
 };
@@ -36,10 +39,13 @@ const Student_Layout: React.FC = () => {
     >
       <Drawer.Screen
         name="Dashboard"
-        component={Screen}
+        component={Student_Dashboard}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Dashboard" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="Dashboard"
+            />
           ),
         })}
       />
@@ -48,7 +54,10 @@ const Student_Layout: React.FC = () => {
         component={Student_Timetable}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Timetable" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="Timetable"
+            />
           ),
         })}
       />
@@ -57,25 +66,34 @@ const Student_Layout: React.FC = () => {
         component={Screen}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Chat" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="Chat"
+            />
           ),
         })}
       />
       <Drawer.Screen
         name="Events"
-        component={Screen}
+        component={Student_Event}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Events" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="Events"
+            />
           ),
         })}
       />
       <Drawer.Screen
         name="ToDoList"
-        component={Screen}
+        component={Student_ToDoList}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="To-Do-Lists" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="To-Do-Lists"
+            />
           ),
         })}
       />
@@ -84,7 +102,10 @@ const Student_Layout: React.FC = () => {
         component={Screen}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="About" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="About"
+            />
           ),
         })}
       />
@@ -93,7 +114,10 @@ const Student_Layout: React.FC = () => {
         component={Screen}
         options={({ navigation }) => ({
           header: () => (
-            <StudentHeader onSidebarToggle={() => navigation.openDrawer()} title="Chatbot" />
+            <StudentHeader
+              onSidebarToggle={() => navigation.openDrawer()}
+              title="Chatbot"
+            />
           ),
         })}
       />

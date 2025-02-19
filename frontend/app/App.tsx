@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { NativeBaseProvider } from "native-base";
+import Student_Login from "@/roles/student/Student_Login";
 import Student_Layout from "@/roles/student/Student_Layout"; // Ensure the correct path
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   return (
     <NativeBaseProvider>
-      
-        <Student_Layout />  {/* This will now be inside NavigationContainer */}
-     
+      {/* Conditionally render based on authentication */}
+      {isAuthenticated ? (
+        <Student_Layout />
+      ) : (
+        <Student_Login setIsAuthenticated={setIsAuthenticated} />
+      )}
     </NativeBaseProvider>
   );
 }
