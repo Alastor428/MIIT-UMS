@@ -5,7 +5,7 @@ import { Course } from "./Student_Timetable";
 interface CourseDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  course: Course | null; 
+  course: Course | null;
 }
 
 const CourseDetailsModal = ({
@@ -14,7 +14,7 @@ const CourseDetailsModal = ({
   course,
 }: CourseDetailsModalProps) => {
   if (!course) {
-    return null; 
+    return null;
   }
 
   return (
@@ -30,7 +30,7 @@ const CourseDetailsModal = ({
             <Text>Instructor: {course.instructor}</Text>
             <Text>Code: {course.code}</Text>
             <Text>Credit: {course.credit}</Text>
-            <Text>Faculty: {course.faculty}</Text>            
+            <Text>Faculty: {course.faculty}</Text>
             <Text style={{ color: "red", fontWeight: "bold" }}>
               Note: Don't forget the Assignments!
             </Text>

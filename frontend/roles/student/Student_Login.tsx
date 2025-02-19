@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Box, Button, Input, Text, VStack, IconButton, Icon } from "native-base";
+import {
+  Box,
+  Button,
+  Input,
+  Text,
+  VStack,
+  IconButton,
+  Icon,
+} from "native-base";
 import { AntDesign } from "@expo/vector-icons";
 
 const Student_Login = ({ setIsAuthenticated }: any) => {
@@ -9,8 +17,8 @@ const Student_Login = ({ setIsAuthenticated }: any) => {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const validEmail = "smt@email.com";
-  const validPassword = "smt123!!";
+  const validEmail = "ykl@email.com";
+  const validPassword = "Ykl123!!";
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -18,9 +26,8 @@ const Student_Login = ({ setIsAuthenticated }: any) => {
   };
 
   const handleLogin = () => {
-    setErrorMessage(""); 
+    setErrorMessage("");
 
-    
     if (!email || !password) {
       setErrorMessage("Email and password are required.");
       return;
@@ -32,14 +39,15 @@ const Student_Login = ({ setIsAuthenticated }: any) => {
     }
 
     if (email === validEmail && password === validPassword) {
-      setIsAuthenticated(true); 
+      setIsAuthenticated(true);
     } else {
       setErrorMessage("Incorrect email or password.");
     }
   };
 
   const checkPasswordStrength = (password: string) => {
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     const weakPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
 
     if (strongPasswordRegex.test(password)) {
@@ -74,48 +82,57 @@ const Student_Login = ({ setIsAuthenticated }: any) => {
       </Text>
 
       <VStack space={3} width="100%" maxW="300px">
-        <Text fontSize="lg">Email</Text> 
+        <Text fontSize="lg">Email</Text>
         <Input
           placeholder="Enter your email"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          size="lg" 
+          size="lg"
         />
 
-        <Text fontSize="lg">Password</Text> 
+        <Text fontSize="lg">Password</Text>
         <Input
           placeholder="Enter your password"
           value={password}
           onChangeText={handlePasswordChange}
-          secureTextEntry={!showPassword} 
+          secureTextEntry={!showPassword}
           size="lg"
           InputRightElement={
             <IconButton
               icon={
                 <AntDesign
-                  name={showPassword ? "eye" : "eyeo"} 
+                  name={showPassword ? "eye" : "eyeo"}
                   size={20}
                   color="gray.500"
                 />
               }
-              onPress={() => setShowPassword(!showPassword)} 
+              onPress={() => setShowPassword(!showPassword)}
               _icon={{ color: "gray.500" }}
               _pressed={{ bg: "transparent" }}
             />
           }
         />
 
-        <Text fontSize="md" color={passwordStrength === "Strong" ? "green.500" : passwordStrength === "Weak" ? "yellow.500" : "red.500"}>
+        <Text
+          fontSize="md"
+          color={
+            passwordStrength === "Strong"
+              ? "green.500"
+              : passwordStrength === "Weak"
+              ? "yellow.500"
+              : "red.500"
+          }
+        >
           Password Strength: {passwordStrength}
         </Text>
 
-        {errorMessage && (
-          <Text color="red.500">{errorMessage}</Text> 
-        )}
+        {errorMessage && <Text color="red.500">{errorMessage}</Text>}
 
-        <Button onPress={handleLogin} mt={4} size="lg">Login</Button> 
+        <Button onPress={handleLogin} mt={4} size="lg">
+          Login
+        </Button>
       </VStack>
     </Box>
   );

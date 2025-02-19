@@ -65,12 +65,12 @@ const OptionsModal = ({
             </VStack>
           </Modal.Body>
         </Modal.Content>
-      </Modal>     
+      </Modal>
       <CourseDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         course={course}
-      />      
+      />
       {course && (
         <EditCourseModal
           isOpen={isEditModalOpen}

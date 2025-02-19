@@ -7,27 +7,37 @@ interface StudentHeaderProps {
   title: string; // Add a title prop
 }
 
-const StudentHeader: React.FC<StudentHeaderProps> = ({ onSidebarToggle, title }) => {
+const StudentHeader: React.FC<StudentHeaderProps> = ({
+  onSidebarToggle,
+  title,
+}) => {
   return (
-    <Box bg="gray.500" px={4} py={3}>
-      <HStack justifyContent="space-between" alignItems="center">        
+    <Box bg="#E5E5E5" px={4} py={3}>
+      <HStack justifyContent="space-between" alignItems="center">
+        {/* Sidebar Toggle Icon */}
         <IconButton
-          icon={<Ionicons name="menu" size={24} color="white" />}
+          icon={<Ionicons name="menu" size={24} color="black" />}
           onPress={onSidebarToggle}
           _pressed={{ bg: "primary.600" }}
-        />        
-        <Text color="white" fontSize="lg" fontWeight="bold">
-          {title} 
-        </Text>      
+        />
+
+        {/* Content Title */}
+        <Text color="black" fontSize="xl" fontWeight="bold">
+          {title} {/* Render the title here */}
+        </Text>
+
+        {/* Notification Icon */}
         <Box position="relative">
           <IconButton
-            icon={<MaterialIcons name="notifications" size={24} color="white" />}
+            icon={
+              <MaterialIcons name="notifications" size={24} color="black" />
+            }
             onPress={() => console.log("Notification pressed")}
             _pressed={{ bg: "primary.600" }}
           />
           {3 > 0 && (
             <Badge
-              bg="red.600"
+              bg="#ED5C7E"
               rounded="full"
               position="absolute"
               top={-2}

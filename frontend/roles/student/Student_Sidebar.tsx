@@ -1,9 +1,9 @@
 import React from "react";
 import { Box, Avatar, Text, VStack, Pressable } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { DrawerParamList } from "./navigationTypes"; 
+import { DrawerParamList } from "./navigationTypes";
 interface SidebarProps {
-  navigation: DrawerNavigationProp<DrawerParamList>; 
+  navigation: DrawerNavigationProp<DrawerParamList>;
 }
 
 const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
@@ -14,18 +14,17 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
         <Avatar
           size="xl"
           source={{
-            uri: "https://example.com/profile-pic.jpg", 
+            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxFv3zhivTb0-F68WalciqjfH-ozebDhMKiQ&s", // Replace with actual profile pic URL
           }}
         />
         <Text fontSize="lg" fontWeight="bold" mt={3}>
-          John Doe
+          Ye Khant Lwin
         </Text>
         <Text fontSize="md" color="gray.500">
-          Role No: 12345
+          Role No: 2021-MIIT-CSE-091
         </Text>
       </Box>
 
-      
       <VStack space={4}>
         <Pressable onPress={() => navigation.navigate("Dashboard")}>
           <Text fontSize="md">Dashboard</Text>
