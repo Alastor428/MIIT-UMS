@@ -6,6 +6,6 @@ export class ResetPasswordDto {
 
     @IsString()
     @MinLength(6)
-    @Matches(/^(?=.*[0-9])/, { message: 'Password must contains at lease one number' })
+    @Matches(/^(?=.*[0-9])/, { message: 'Password must contains at least one number' })
     newPassword: string;
 }

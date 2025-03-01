@@ -17,18 +17,23 @@ export class EventController {
     return this.eventService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventService.findOne(id);
+  @Get('/get-event')
+  findOne(@Body('title') title: string) {
+    return this.eventService.findOne(title);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventService.update(id, updateEventDto);
+  @Get(':priority')
+  async getEventsByPriority(@Param('priority') priority: string) {
+    return this.eventService.getEventsByPriority(priority)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.eventService.remove(id);
+  @Patch('update/:title')
+  update(@Param('title') title: string, @Body() updateEventDto: UpdateEventDto) {
+    return this.eventService.update(title, updateEventDto);
+  }
+
+  @Delete(':title')
+  remove(@Param('title') title: string) {
+    return this.eventService.remove(title);
   }
 }

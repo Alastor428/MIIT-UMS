@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
 
         } catch (e) {
             Logger.error(e.message);
-            throw new UnauthorizedException("Inavlid token");
+            throw new UnauthorizedException("Invalid token");
         }
 
         return true;

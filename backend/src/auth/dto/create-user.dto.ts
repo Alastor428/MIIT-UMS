@@ -1,5 +1,6 @@
 import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from "class-validator";
 import { Gender, User, UserRole } from "../schemas/user.schema";
+import { AdminRole } from "src/admin/schemas/admin.schema";
 
 export class CreateUserDto {
     @IsString()
@@ -25,9 +26,22 @@ export class CreateUserDto {
 
     @IsOptional()
     @IsString()
+    roll_no?: string;
+
+    @IsOptional()
+    @IsString()
     department?: string;
 
     @IsOptional()
     @IsBoolean()
     isHOD?: boolean;
+
+    @IsOptional()
+    @IsEnum(AdminRole)
+    adminRole: AdminRole
+
+    @IsOptional()
+    @IsString()
+    shortName: string;
+
 }

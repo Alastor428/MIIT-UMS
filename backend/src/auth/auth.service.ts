@@ -15,6 +15,8 @@ import { StudentService } from 'src/student/student.service';
 import { TeacherService } from 'src/teacher/teacher.service';
 import { CreateTeacherDto } from 'src/teacher/dto/create-teacher.dto';
 import { CreateStudentDto } from 'src/student/dto/create-student.dto';
+import { AdminService } from 'src/admin/admin.service';
+import { CreateAdminDto } from 'src/admin/dto/create-admin.dto';
 uuidv4();
 
 
@@ -27,13 +29,14 @@ export class AuthService {
     private mailService: MailService,
     private studentService: StudentService,
     private teacherService: TeacherService,
+    private adminService: AdminService,
     @InjectModel(User.name) private UserModel: Model<User & { _id: string }>,
     @InjectModel(ResetToken.name) private ResetTokenModel: Model<ResetToken>,
     @InjectModel(RefreshToken.name) private RefreshTokenModel: Model<RefreshToken>) { }
 
 
   async register(createUserDto: CreateUserDto): Promise<any> {
-    const { name, email, password, role, batch, department, isHOD, gender } = createUserDto;
+    const { name, email, password, role, batch, department, isHOD, gender, adminRole, shortName, roll_no } = createUserDto;
 
 
     if (!email) {
@@ -64,6 +67,7 @@ export class AuthService {
 
       const studentData: CreateStudentDto = {
         batch,
+        roll_no
       }
       await this.studentService.createStudent(user._id, studentData);
     }
@@ -72,11 +76,19 @@ export class AuthService {
         throw new BadRequestException('Department is required for teachers');
       }
       const teacherData: CreateTeacherDto = {
+        shortName,
         department,
         isHOD: isHOD || false,
       };
 
       await this.teacherService.createTeacher(user._id, teacherData);
+    }
+    else if (role == 'admin') {
+
+      const adminData: CreateAdminDto = {
+        adminRole
+      };
+      await this.adminService.createAdmin(user._id, adminData)
     }
 
     return {
@@ -160,6 +172,11 @@ export class AuthService {
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = newHashedPassword;
     await user.save();
+
+    return {
+      message: "Success",
+      newHashedPassword,
+    }
   }
 
   //Forgot Password
@@ -207,5 +224,7 @@ export class AuthService {
     await user.save();
 
   }
+
+
 
 }

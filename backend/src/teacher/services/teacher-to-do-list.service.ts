@@ -1,19 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { Teacher } from '../models/teacher.schema';
 import { TeacherToDoListDto } from '../dto/teacherToDoList.dto';
+import { User } from 'src/auth/schemas/user.schema';
 // To Do List 
 export class TeacherToDoListService {
     constructor(
         @InjectModel(Teacher.name) private readonly teacherModel: Model<Teacher>,
+        @InjectModel(User.name) private readonly userModel: Model<User>,
     ) { }
 
     async updateToDoList(
-        teacherId: string,
+        userId: string,
         todoListData: TeacherToDoListDto[],
     ) {
-        const teacher = await this.teacherModel.findById(teacherId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found")
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -31,8 +38,13 @@ export class TeacherToDoListService {
     }
 
     // Get to do list
-    async getToDoList(teacherId: string) {
-        const teacher = await this.teacherModel.findById(teacherId);
+    async getToDoList(userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found")
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -44,11 +56,16 @@ export class TeacherToDoListService {
 
     // Delete a task from the list
     async deleteTask(
-        teacherId: string,
+        userId: string,
         taskTitle: string,
     ): Promise<{ message: string; todoList: any[] }> {
         // Find the teacher
-        const teacher = await this.teacherModel.findById(teacherId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found")
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }

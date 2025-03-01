@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, mongo, Types } from 'mongoose';
 import { Student } from '../schemas/student.schema';
 import { CourseDetails } from 'src/course-details/schemas/course-details.schema';
 import { AddCourseToTimetableDto } from '../dto/student-timetable.dto';
+import { User } from 'src/auth/schemas/user.schema';
 
 @Injectable()
 export class TimetableService {
     constructor(
         @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+        @InjectModel(User.name) private readonly userModel: Model<User>
     ) { }
 
     // Add a course to the student's timetable
@@ -69,11 +71,17 @@ export class TimetableService {
 
     // Edit course
     async editCourse(
-        studentId: string,
+        userId: string,
         oldCourseCode: string,
         updatedData: Partial<CourseDetails>,
     ) {
-        const student = await this.studentModel.findById(studentId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
@@ -105,10 +113,15 @@ export class TimetableService {
 
     // Delete courses
     async deleteCourse(
-        studentId: string,
+        userId: string,
         courseId: string,
     ) {
-        const student = await this.studentModel.findById(studentId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
@@ -134,8 +147,14 @@ export class TimetableService {
 
 
     // Get student time table
-    async getStudentTimetable(studentId: string) {
-        const student = await this.studentModel.findById(studentId);
+    async getStudentTimetable(userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
@@ -185,8 +204,13 @@ export class TimetableService {
     }
 
     // Reset Time Table to null
-    async resetTimetable(studentId: string): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
-        const student = await this.studentModel.findById(studentId);
+    async resetTimetable(userId: string): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const student = await this.studentModel.findOne({ user: objectId });
 
         if (!student) {
             throw new NotFoundException('Student not found');
@@ -331,12 +355,17 @@ export class TimetableService {
     }
     // Delete Single Timetable cell
     async deleteTimetableCell(
-        studentId: string,
+        userId: string,
         day: string,
         time: string,
     ): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
 
-        const student = await this.studentModel.findById(studentId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }

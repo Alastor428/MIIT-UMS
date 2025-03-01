@@ -1,23 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, mongo, Types } from 'mongoose';
 import { Teacher } from '../models/teacher.schema';
 import { CourseDetails } from '../schemas/course-details.schema';
 import { AddCourseToTimetableDto } from '../dto/teacher-timetable.dto';
+import { User } from 'src/auth/schemas/user.schema';
 
 @Injectable()
 export class TeacherTimetableService {
     constructor(
         @InjectModel(Teacher.name) private readonly teacherModel: Model<Teacher>,
+        @InjectModel(User.name) private readonly userModel: Model<User>
     ) { }
 
     // Add a course to the teacher's timetable
     async addCourseToTimetable(
-        teacherId: string,
+        userId: string,
         timetableData: AddCourseToTimetableDto,
     ) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
         const { day, time, courseCode, courseName, batch, room, credit, note } = timetableData;
-        const teacher = await this.teacherModel.findById(teacherId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -62,11 +69,16 @@ export class TeacherTimetableService {
 
     // Edit course
     async editCourse(
-        teacherId: string,
+        userId: string,
         oldCourseCode: string,
         updatedData: Partial<CourseDetails>,
     ) {
-        const teacher = await this.teacherModel.findById(teacherId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -98,10 +110,15 @@ export class TeacherTimetableService {
 
     // Delete courses
     async deleteCourse(
-        teacherId: string,
+        userId: string,
         courseId: string,
     ) {
-        const teacher = await this.teacherModel.findById(teacherId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -126,8 +143,13 @@ export class TeacherTimetableService {
     }
 
 
-    async getTeacherTimetable(teacherId: string) {
-        const teacher = await this.teacherModel.findById(teacherId);
+    async getTeacherTimetable(userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -178,8 +200,13 @@ export class TeacherTimetableService {
     }
 
     // Reset Time Table to null
-    async resetTimetable(teacherId: string): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
-        const teacher = await this.teacherModel.findById(teacherId);
+    async resetTimetable(userId: string): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
 
         if (!teacher) {
             throw new NotFoundException('teacher not found');
@@ -224,12 +251,17 @@ export class TeacherTimetableService {
 
     // Delete a time table cell
     async deleteTimetableCell(
-        teacherId: string,
+        userId: string,
         day: string,
         time: string,
     ): Promise<{ message: string; timetable: Map<string, Map<string, string>> }> {
 
-        const teacher = await this.teacherModel.findById(teacherId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const teacher = await this.teacherModel.findOne({ user: objectId });
         if (!teacher) {
             throw new NotFoundException('teacher not found');
         }
@@ -301,7 +333,6 @@ export class TeacherTimetableService {
         batch: string, courseDetailsForTeachers: any[], timetableData: any[]
     ): Promise<{ message: string }> {
         // Method to update teacher timetables based on the courses they teach
-        console.log('Timetable Data Passed : ', timetableData)
         // Create a mapping of courseCode to _id
         const courseCodeToIdMap = new Map<string, Types.ObjectId>();
         for (const course of courseDetailsForTeachers) {
@@ -340,7 +371,6 @@ export class TeacherTimetableService {
                     } as CourseDetails;
                     teacher.course_details.push(newCourse);
                 }
-                console.log('Passed:', teacher.course_details)
 
                 // Update the teacher's timetable
                 for (const timetableEntry of timetableData) {
@@ -352,7 +382,6 @@ export class TeacherTimetableService {
                         if (course) {
                             var teacherCourse = teacher.course_details.find((c) => c._id.toString() === course.toString())
                             if (teacherCourse) {
-                                console.log("Course Id to be added : ", teacherCourse._id.toString())
                                 dayMap.set(time, teacherCourse._id.toString());
                                 teacher.timetable.set(day, dayMap);
                             }
@@ -390,12 +419,7 @@ export class TeacherTimetableService {
     }
 
     async findTeachersByName(name: string): Promise<Teacher[]> {
-        return await this.teacherModel.find({})
-            .populate({
-                path: 'user',
-                match: { name: name },
-                select: name
-            })
+        return await this.teacherModel.find({ shortName: name })
             .exec()
             .then((teachers) => teachers.filter((teacher) => teacher.user)); // Assuming `user.name` stores the teacher's name
     }

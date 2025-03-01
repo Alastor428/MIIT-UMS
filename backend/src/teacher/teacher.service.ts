@@ -7,15 +7,20 @@ import { GetAllTeachersDto } from './dto/getAllTeachers.dto';
 import { Teacher } from './models/teacher.schema';
 import { GetTeacher } from './operations/query/getTeacher';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
+import { User } from 'src/auth/schemas/user.schema';
+import { TeacherEventDto } from './dto/teacher-event.dto';
+import { NotificationService } from './services/teacher-notification.service';
 
 @Injectable()
 export class TeacherService {
   constructor(
+    private readonly notificationService: NotificationService,
     private readonly teacherCreate: CreateTeacher,
     private readonly fetchAllTeachers: GetAllTeachers,
     private readonly fetchTeacher: GetTeacher,
-    @InjectModel(Teacher.name) private teacherModel: Model<Teacher>
+    @InjectModel(Teacher.name) private teacherModel: Model<Teacher>,
+    @InjectModel(User.name) private userModel: Model<User>
   ) { }
 
   async createTeacher(
@@ -25,13 +30,51 @@ export class TeacherService {
     return await this.teacherCreate.createTeacher(userId, input)
   }
 
-  async getAllTeachers(
-    authId: string,
-    offset: number,
-    limit: number,
-    search: string,
-  ): Promise<GetAllTeachersDto> {
-    return await this.fetchAllTeachers.getAllTeachers(authId, offset, limit, search);
+  // Get teacher by user id
+  async getTeacherByUserId(userID: string) {
+    const user = await this.userModel.findById(userID);
+    if (!user) {
+      throw new NotFoundException("User NOT FOUND");
+
+    }
+    const objectId = new mongoose.Types.ObjectId(userID);
+    const teacher = await this.teacherModel.findOne({ user: objectId }).populate({
+      path: 'user',
+      select: 'name email'
+    });
+    return {
+      message: 'Success',
+      teacher
+    }
+  }
+
+
+  async getTeacherBydepartment(dept: string) {
+    const teachers = await this.teacherModel.find({ department: dept }).select('shortName isHOD department').populate({
+      path: 'user',
+      select: 'name email'
+    })
+    if (teachers.length == 0) {
+      throw new NotFoundException("teachers NOT FOUND")
+    }
+
+    return {
+      message: "Success",
+      teachers
+    }
+  }
+
+  // async getAllTeachers(
+  //   authId: string,
+  //   offset: number,
+  //   limit: number,
+  //   search: string,
+  // ): Promise<GetAllTeachersDto> {
+  //   return await this.fetchAllTeachers.getAllTeachers(authId, offset, limit, search);
+  // }
+
+  async getAllTeachers() {
+    return await this.fetchAllTeachers.getAllTeachers()
   }
 
 
@@ -40,10 +83,37 @@ export class TeacherService {
   }
 
   async deleteTeacher(teacherId: string): Promise<Teacher> {
+    const teacher = await this.teacherModel.findById(teacherId);
     const deletedTeacher = await this.teacherModel.findByIdAndDelete(teacherId);
     if (!deletedTeacher) {
       throw new NotFoundException(`Teacher with ID ${teacherId} not found`);
     }
+    const user = await this.userModel.findByIdAndDelete(teacher.user._id)
+    if (!user) {
+      console.log("User not found")
+    } else {
+      console.log("Deleted User : ", user)
+    }
     return deletedTeacher;
   }
+
+
+  async createEvent(teacherId: string, event: TeacherEventDto): Promise<Teacher> {
+    const teacher = await this.teacherModel.findById(teacherId).exec();
+
+    if (!teacher) {
+      throw new Error('Teacher not found');
+    }
+
+    // Add the event to the teacher's event list
+    teacher.event.push(event);
+    await teacher.save();
+
+    // Send notification to the designated batch
+    await this.notificationService.sendEventNotification(event);
+
+    return teacher;
+  }
+
+
 }

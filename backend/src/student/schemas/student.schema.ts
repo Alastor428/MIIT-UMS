@@ -7,6 +7,9 @@ export class Student extends Document {
     @Prop({ required: true })
     batch: string;
 
+    @Prop({ required: true, unique: true })
+    roll_no: string;
+
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     user: Types.ObjectId;
 

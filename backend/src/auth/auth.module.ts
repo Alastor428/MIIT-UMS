@@ -10,6 +10,7 @@ import { ResetToken, ResetTokenSchema } from './schemas/reset-tokens.schema';
 import { MailService } from 'src/services/mail.services';
 import { StudentModule } from 'src/student/student.module';
 import { TeacherModule } from 'src/teacher/teacher.module';
+import { AdminModule } from 'src/admin/admin.module';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { TeacherModule } from 'src/teacher/teacher.module';
       schema: RefreshTokenSchema
     },
 
-    ]), forwardRef(() => StudentModule), forwardRef(() => TeacherModule)],
+    ]), forwardRef(() => StudentModule), forwardRef(() => TeacherModule), forwardRef(() => AdminModule)],
   controllers: [AuthController],
   providers: [AuthService, MailService],
   exports: [

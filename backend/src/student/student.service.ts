@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { User } from '../auth/schemas/user.schema';
 import { Student } from './schemas/student.schema';
 
@@ -31,6 +31,23 @@ export class StudentService {
     }
   }
 
+  async findStudentByUserId(userId: string) {
+    const user = await this.authModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException("User NOT FOUND");
+
+    }
+    const objectId = new mongoose.Types.ObjectId(userId); // Convert string to ObjectId
+    const student = await this.studentModel.findOne({ user: objectId }).populate({
+      path: 'user',
+      select: 'name email'
+    });
+    return {
+      message: "Success",
+      student
+    }
+  }
+
   async findStudentByEmail(email: string) {
     const user = await this.authModel.findOne({ email }).exec();
     if (!user) {
@@ -51,22 +68,39 @@ export class StudentService {
 
   // delete a student document
   async deleteStudent(studentId: string) {
+    const student = await this.studentModel.findById(studentId);
     const deletedStudent = await this.studentModel.findByIdAndDelete(studentId);
     if (!deletedStudent) {
       throw new NotFoundException(`Student with ID ${studentId} not found`);
     }
+    const user = await this.authModel.findByIdAndDelete(student.user._id)
+    if (!user) {
+      console.log("user not found");
+
+    } else {
+      console.log("Deleted user: ", user)
+    }
+
     return deletedStudent;
   }
 
   // get all students
   async getAllStudents(): Promise<Student[]> {
-    return this.studentModel.find().exec();
+    return this.studentModel.find().populate({
+      path: 'user',
+      select: 'name email'
+    }).exec();
   }
 
   // Get all students by batch
   async getStudentsByBatch(batch: string) {
-    return this.studentModel.find({ batch }).exec();
+    return this.studentModel.find({ batch }).populate({
+      path: 'user',
+      select: 'name email'
+    }).exec();
   }
+
+
 }
 
 

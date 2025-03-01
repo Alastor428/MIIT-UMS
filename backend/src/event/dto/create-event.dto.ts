@@ -6,7 +6,7 @@ export class CreateEventDto {
     title: string;
 
     @IsString()
-    description: string;
+    details: string;
 
     @IsString()
     time: string;

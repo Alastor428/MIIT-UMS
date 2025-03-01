@@ -6,4 +6,7 @@ export class CreateStudentDto {
 
     @IsString()
     batch: string;
+
+    @IsString()
+    roll_no: string;
 }

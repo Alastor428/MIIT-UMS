@@ -1,9 +1,14 @@
 import { Schema, SchemaFactory, Prop } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
+export enum Priority {
+    High = "high",
+    Low = "low"
+}
+
 @Schema()
 export class Event extends Document {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     title: string;
 
     @Prop()
@@ -21,7 +26,7 @@ export class Event extends Document {
     @Prop()
     place: string;
 
-    @Prop()
-    priority: string;
+    @Prop({ type: String, enum: Object.values(Priority), required: true })
+    priority: Priority;
 }
 export const eventSchema = SchemaFactory.createForClass(Event);

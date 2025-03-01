@@ -26,9 +26,14 @@ export class BatchTimetableController {
     );
   }
 
+  @Get('all')
+  async getAllBatchTimetable() {
+    return await this.batchTimetableService.getAllBatchTimetable();
+  }
+
   @Get(':batch')
   async getBatchTimetable(@Param('batch') batch: string) {
-    return this.batchTimetableService.getBatchTimetable(batch);
+    return await this.batchTimetableService.getBatchTimetable(batch);
   }
 
   // Route to upload CSV and update batch timetable

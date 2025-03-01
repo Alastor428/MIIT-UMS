@@ -166,6 +166,38 @@ export class BatchTimetableService {
     };
   }
 
+  async getAllBatchTimetable() {
+    // Fetch all batch timetables from the database
+    const batchTimetables = await this.batchTimetableModel.find().lean();
+
+    if (!batchTimetables || batchTimetables.length === 0) {
+      throw new NotFoundException('No batch timetables found');
+    }
+
+    // Format the timetables and course details for each batch
+    const formattedBatchTimetables = batchTimetables.map((batchTimetable) => {
+      const courseMap = new Map<string, any>();
+      for (const course of batchTimetable.course_details) {
+        courseMap.set(course._id.toString(), course);
+      }
+
+      const formattedTimetable = batchTimetable.timetable.map((row) => {
+        const formattedRow: any = { time: row.time };
+        for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
+          formattedRow[day] = row[day] ? courseMap.get(row[day].toString()) : null;
+        }
+        return formattedRow;
+      });
+
+      return {
+        batch: batchTimetable.batch,
+        timetable: formattedTimetable,
+        course_details: batchTimetable.course_details,
+      };
+    });
+
+    return formattedBatchTimetables;
+  }
   async processAndSortTimetableFromCSV(filePath: string): Promise<{ [batch: string]: { timetable: any[]; course_details: any[]; teacher_course_details: any[] } }> {
     const batchTimetableMap = new Map<string, { timetable: any[]; course_details: any[]; teacher_course_details: any[] }>();
     let currentBatch: string | null = null;

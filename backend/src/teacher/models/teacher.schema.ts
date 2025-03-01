@@ -2,11 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 import { CourseDetails } from '../schemas/course-details.schema';
 import { ToDoListDto } from '../dto/to-do-list.dto';
+import { TeacherEventDto } from '../dto/teacher-event.dto';
 
 @Schema({
   timestamps: true,
 })
 export class Teacher extends Document {
+  @Prop({ required: true, unique: true })
+  shortName: string
+
   @Prop({
     type: Map,
     of: Map,
@@ -22,6 +26,9 @@ export class Teacher extends Document {
 
   @Prop({ default: false })
   isHOD: boolean;
+
+  @Prop({ type: [TeacherEventDto], default: [] })
+  event: TeacherEventDto[];
 
   @Prop({ type: [ToDoListDto], default: [] })
   todo_list: ToDoListDto[];

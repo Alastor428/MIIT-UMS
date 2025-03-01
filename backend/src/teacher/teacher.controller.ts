@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, Query, ParseIntPipe, Patch, ValidationPipe, UsePipes } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request, Query, ParseIntPipe, Patch, ValidationPipe, UsePipes, Req } from '@nestjs/common';
 import { TeacherService } from './teacher.service';
 import { ModifyResponse } from 'src/utils/constants/ModifyResponse.dto';
 import { GetAllTeachersDto } from './dto/getAllTeachers.dto';
@@ -8,6 +8,8 @@ import { TeacherUpdateCourseAndTimetableDto } from './dto/teacher-update-course-
 import { TeacherToDoListDto } from './dto/teacherToDoList.dto';
 import { TeacherToDoListService } from './services/teacher-to-do-list.service';
 import { AddCourseToTimetableDto } from './dto/teacher-timetable.dto';
+import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('teacher')
 export class TeacherController {
@@ -17,37 +19,61 @@ export class TeacherController {
     private readonly todolistService: TeacherToDoListService
   ) { }
 
-  //FIXME: get all teachers
+  @Post("createTeacher/:userId")
+  // @UseGuards(AuthGuard)
+  async createTeacher(
+    @Param('userId') userId: string,
+    @Body() input: CreateTeacherDto
+  ): Promise<ModifyResponse> {
+    return await this.teacherService.createTeacher(userId, input);
+  }
+  // get all teachers
+  // @Get('all')
+  // async getAllUsers(
+  //   @Query('offset', new ParseIntPipe()) offset: number,
+  //   @Query('limit', new ParseIntPipe()) limit: number,
+  //   @Query('search') search: string,
+  //   @Request() req,
+  // ): Promise<GetAllTeachersDto> {
+  //   const authId = req.userId;
+  //   return await this.teacherService.getAllTeachers(authId, offset, limit, search);
+  // }
   @Get('all')
-  async getAllUsers(
-    @Query('offset', new ParseIntPipe()) offset: number,
-    @Query('limit', new ParseIntPipe()) limit: number,
-    @Query('search') search: string,
-    @Request() req,
-  ): Promise<GetAllTeachersDto> {
-    const authId = req.userId;
-    return await this.teacherService.getAllTeachers(authId, offset, limit, search);
+  async getAllUsers() {
+    return this.teacherService.getAllTeachers()
   }
 
-  @Get('get-teacher')
+  @Get('get-teacher/:userId')
+  async getTeacherByUserId(@Param('userId') userId: string) {
+    return await this.teacherService.getTeacherByUserId(userId);
+  }
+
+  @Get('email')
   async getTeacher(
     @Body('email') email: string,
   ): Promise<Teacher> {
     return await this.teacherService.getTeacher(email);
   }
 
-
-  @Post("createTeacher/:userId")
-  // @UseGuards(AuthGuard)
-  async createTeacher(
-    @Param('userId') userId: string,
-    @Body() input: { department: string, isHOD: boolean },
-  ): Promise<ModifyResponse> {
-    return await this.teacherService.createTeacher(userId, input);
+  @UseGuards(AuthGuard)
+  @Get('get-teacher')
+  async getTeacherbyId(
+    @Req() req: any,
+  ) {
+    return await this.teacherService.getTeacherByUserId(req.userId);
   }
 
+  @Get('get-teacher/:department')
+  async getTeacherByDept(
+    @Param('department') department: string,
+  ) {
+    return await this.teacherService.getTeacherBydepartment(department);
+  }
+
+
+
   // Delete a teacher document
-  @Delete(':id')
+  @Delete('delete/:id')
   async deleteTeacher(
     @Param('id') teacherId: string
   ): Promise<ModifyResponse> {
@@ -61,30 +87,33 @@ export class TeacherController {
   // Time Table
 
   // Add a course to the table
-  @Post(':teacherId/timetable')
+  @UseGuards(AuthGuard)
+  @Post('timetable')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async addCourseToTimetable(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Body() timetableData: AddCourseToTimetableDto,
   ) {
-    const result = await this.timetableService.addCourseToTimetable(teacherId, timetableData);
+    const result = await this.timetableService.addCourseToTimetable(req.userId, timetableData);
     return result;
   }
   // Get a teacher's timetable
-  @Get(':teacherId/timetable')
-  async getStudentTimetable(@Param('teacherId') teacherId: string) {
-    const timetable = await this.timetableService.getTeacherTimetable(teacherId);
+  @UseGuards(AuthGuard)
+  @Get('timetable')
+  async getStudentTimetable(@Req() req: any) {
+    const timetable = await this.timetableService.getTeacherTimetable(req.userId);
     return timetable;
   };
 
   // Update a course and its references in the timetable
-  @Put('update-course/:teacherId')
+  @UseGuards(AuthGuard)
+  @Put('update-course')
   async updateCourseAndTimetable(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Body() updateData: TeacherUpdateCourseAndTimetableDto,
   ) {
     const response = await this.timetableService.editCourse(
-      teacherId,
+      req.userId,
       updateData.oldCourseCode,
       updateData.newCourseData,
     );
@@ -95,38 +124,41 @@ export class TeacherController {
   }
 
   // Reset a teacher's timetable
-  @Patch(':teacherId/reset')
-  async resetTimetable(@Param('teacherId') teacherId: string) {
-    const response = await this.timetableService.resetTimetable(teacherId);
+  @UseGuards(AuthGuard)
+  @Patch('timetable/reset')
+  async resetTimetable(@Req() req: any) {
+    const response = await this.timetableService.resetTimetable(req.userId);
     return {
       message: response.message,
       timetable: response.timetable,
     };
   }
 
-  //SUCCESS: Delete a course from the timetable
-  @Delete(':teacherId/course/:courseId')
+  // Delete a course from the timetable
+  @UseGuards(AuthGuard)
+  @Delete('course/:courseId')
   async deleteCourse(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Param('courseId') courseId: string,
   ) {
-    const result = await this.timetableService.deleteCourse(teacherId, courseId);
+    const result = await this.timetableService.deleteCourse(req.userId, courseId);
     return result;
   }
 
-  //SUCCESS: Delete a single cell in the timetable
-  @Delete(':teacherId/timetable/cell')
+  // Delete a single cell in the timetable
+  @UseGuards(AuthGuard)
+  @Delete('timetable/cell')
   async deleteTimetableCell(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Body() deleteData: { day: string; time: string },
   ) {
     const { day, time } = deleteData;
-    return await this.timetableService.deleteTimetableCell(teacherId, day, time);
+    return await this.timetableService.deleteTimetableCell(req.userId, day, time);
   }
 
 
 
-  //SUCCESS: Add existing course to the timetable
+  // Add existing course to the timetable
   @Post(':teacherId/timetable/cell')
   async addExistingCourseToTimetable(
     @Param('teacherId') teacherId: string,
@@ -139,27 +171,30 @@ export class TeacherController {
   // To do List
 
 
-  //SUCCESS: Update to do list
-  @Put(':teacherId/to-do-list')
+  // Update to do list
+  @UseGuards(AuthGuard)
+  @Put('to-do-list')
   async updateToDoList(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Body() todoListData: TeacherToDoListDto[],
   ) {
-    const result = await this.todolistService.updateToDoList(teacherId, todoListData);
+    const result = await this.todolistService.updateToDoList(req.userId, todoListData);
     return result;
   }
-  //SUCCESS: Get To do list
-  @Get(':teacherId/to-do-list')
-  async getToDoList(@Param('teacherId') teacherId: string) {
-    const result = await this.todolistService.getToDoList(teacherId);
+  // Get To do list
+  @UseGuards(AuthGuard)
+  @Get('to-do-list')
+  async getToDoList(@Req() req: any) {
+    const result = await this.todolistService.getToDoList(req.userId);
     return result;
   }
-  //SUCCESS: Delete a task from the list
-  @Delete(':teacherId/to-do-list/:taskTitle')
+  // Delete a task from the list
+  @UseGuards(AuthGuard)
+  @Delete('to-do-list/:taskTitle')
   async deleteTask(
-    @Param('teacherId') teacherId: string,
+    @Req() req: any,
     @Param('taskTitle') taskTitle: string, // Extract taskTitle from the route
   ) {
-    return await this.todolistService.deleteTask(teacherId, taskTitle);
+    return await this.todolistService.deleteTask(req.userId, taskTitle);
   }
 }

@@ -1,20 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { Student } from '../schemas/student.schema';
 import { ToDoListDto } from '../dto/todolist.dto';
+import { User } from 'src/auth/schemas/user.schema';
 
 // To Do List 
 export class ToDoListService {
     constructor(
         @InjectModel(Student.name) private readonly studentModel: Model<Student>,
+        @InjectModel(User.name) private readonly userModel: Model<User>
     ) { }
 
     async updateToDoList(
-        studentId: string,
+        userId: string,
         todoListData: ToDoListDto[],
     ) {
-        const student = await this.studentModel.findById(studentId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
@@ -32,8 +39,13 @@ export class ToDoListService {
     }
 
     // Get to do list
-    async getToDoList(studentId: string) {
-        const student = await this.studentModel.findById(studentId);
+    async getToDoList(userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
@@ -45,11 +57,16 @@ export class ToDoListService {
 
     // Delete a task from the list
     async deleteTask(
-        studentId: string,
+        userId: string,
         taskTitle: string,
     ): Promise<{ message: string; todoList: any[] }> {
         // Find the student
-        const student = await this.studentModel.findById(studentId);
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User Not Found");
+        }
+        const objectId = new mongoose.Types.ObjectId(userId)
+        const student = await this.studentModel.findOne({ user: objectId });
         if (!student) {
             throw new NotFoundException('Student not found');
         }
