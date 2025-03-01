@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Input, FormControl } from "native-base";
-import { Course } from "./Student_Timetable"; 
+import { Course } from "./Student_Timetable";
 
 interface EditCourseModalProps {
   isOpen: boolean;
@@ -9,17 +9,23 @@ interface EditCourseModalProps {
   handleEditCourse: (updatedCourse: Course) => void;
 }
 
-const EditCourseModal = ({ isOpen, onClose, course, handleEditCourse }: EditCourseModalProps) => {
-
-  const [updatedCourse, setUpdatedCourse] = React.useState<Course>(course);
+const EditCourseModal = ({
+  isOpen,
+  onClose,
+  course,
+  handleEditCourse,
+}: EditCourseModalProps) => {
+  const [updatedCourse, setUpdatedCourse] = useState<Course>(course);
 
   useEffect(() => {
-    setUpdatedCourse(course);  
+    if (course) {
+      setUpdatedCourse(course);
+    }
   }, [course]);
 
   const handleSave = () => {
-    handleEditCourse(updatedCourse); 
-    onClose(); 
+    handleEditCourse(updatedCourse);
+    onClose();
   };
 
   return (
@@ -31,51 +37,64 @@ const EditCourseModal = ({ isOpen, onClose, course, handleEditCourse }: EditCour
           <FormControl>
             <FormControl.Label>Course Name</FormControl.Label>
             <Input
-              value={updatedCourse.name}  
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, name: text }))}
+              value={updatedCourse.name}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, name: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Instructor</FormControl.Label>
             <Input
-              value={updatedCourse.instructor}  
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, instructor: text }))}
+              value={updatedCourse.instructor}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, instructor: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Time</FormControl.Label>
             <Input
-              value={updatedCourse.time}  
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, time: text }))}
+              value={updatedCourse.time}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, time: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Room</FormControl.Label>
             <Input
-              value={updatedCourse.room}  
-              
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, room: text }))}
+              value={updatedCourse.room}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, room: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Course Code</FormControl.Label>
             <Input
-              value={updatedCourse.code} 
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, code: text }))}
+              value={updatedCourse.code}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, code: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Credit</FormControl.Label>
             <Input
-              value={updatedCourse.credit}  
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, credit: text }))}
+              value={updatedCourse.credit}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, credit: text }))
+              }
             />
           </FormControl>
           <FormControl mt={4}>
             <FormControl.Label>Faculty</FormControl.Label>
             <Input
-              value={updatedCourse.faculty} 
-              onChangeText={(text) => setUpdatedCourse((prev) => ({ ...prev, faculty: text }))}
+              value={updatedCourse.faculty}
+              onChangeText={(text) =>
+                setUpdatedCourse((prev) => ({ ...prev, faculty: text }))
+              }
             />
           </FormControl>
         </Modal.Body>

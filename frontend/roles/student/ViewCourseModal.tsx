@@ -1,7 +1,6 @@
 import React from "react";
 import { Modal, Box, Text, Button } from "native-base";
 
-
 interface ViewCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
