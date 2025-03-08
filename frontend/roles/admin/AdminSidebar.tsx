@@ -1,12 +1,12 @@
 import React from "react";
-import { Box, Avatar, Text, VStack, Pressable ,Button } from "native-base";
+import { Box, Avatar, Text, VStack, Pressable,Button } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerParamList } from "./navigationTypes";
 interface SidebarProps {
   navigation: DrawerNavigationProp<DrawerParamList>;
 }
 
-const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
+const Admin_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
   
   return (
     <Box flex={1} bg="white" p={4}>
@@ -19,19 +19,22 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           }}
         />
         <Text fontSize="lg" fontWeight="bold" mt={3}>
-          Ye Khant Lwin
+          Daw Win Aye
         </Text>
         <Text fontSize="md" color="gray.500">
-          Role No: 2021-MIIT-CSE-091
+          High Level Admin
         </Text>
       </Box>
 
       <VStack space={4}>
-        <Pressable onPress={() => navigation.navigate("Dashboard")}>
-          <Text fontSize="md">Dashboard</Text>
+        <Pressable onPress={() => navigation.navigate("Admin")}>
+          <Text fontSize="md">Admin</Text>
         </Pressable>
-        <Pressable onPress={() => navigation.navigate("Timetable")}>
-          <Text fontSize="md">Timetable</Text>
+        <Pressable onPress={() => navigation.navigate("Teacher")}>
+          <Text fontSize="md">Teacher</Text>
+        </Pressable>
+        <Pressable onPress={() => navigation.navigate("Student")}>
+          <Text fontSize="md">Student</Text>
         </Pressable>
         <Pressable onPress={() => navigation.navigate("Chat")}>
           <Text fontSize="md">Chat</Text>
@@ -49,9 +52,9 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           <Text fontSize="md">Chatbot</Text>
         </Pressable>
       </VStack>
-     
+      
     </Box>
   );
 };
 
-export default Student_Sidebar;
+export default Admin_Sidebar;
