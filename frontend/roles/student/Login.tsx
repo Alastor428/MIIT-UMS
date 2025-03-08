@@ -1,29 +1,24 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Input,
-  Text,
-  VStack,
-  IconButton,
-  Icon,
-} from "native-base";
+import { Box, Button, Input, Text, VStack, IconButton, Icon } from "native-base";
 import { AntDesign } from "@expo/vector-icons";
 
-// Define the props type
-interface StudentLoginProps {
-  onLogin: (email: string) => void; // Define the type of onLogin
+// Define the props type once
+interface LoginProps {
+  onLogin: (role: string) => void; // Passing role after successful login
 }
 
-const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
+const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const validEmail = "ykl@email.com";
-  const validPassword = "Ykl123!!";
+  const validCredentials = {
+    admin: { email: "winaye@email.com", password: "Win123!!" },
+    teacher: { email: "zarchi@email.com", password: "Zar123!!" },
+    student: { email: "ykl@email.com", password: "Ykl123!!" },
+  };
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -32,24 +27,28 @@ const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
 
   const handleLogin = () => {
     setErrorMessage("");
-  
+
     if (!email || !password) {
       setErrorMessage("Email and password are required.");
       return;
     }
-  
+
     if (!isValidEmail(email)) {
       setErrorMessage("Invalid email format.");
       return;
     }
-  
-    if (email.toLowerCase() === validEmail.toLowerCase() && password === validPassword) {
-      onLogin(email);
+
+    // Check if the email and password match for any role
+    if (email === validCredentials.admin.email && password === validCredentials.admin.password) {
+      onLogin("admin");
+    } else if (email === validCredentials.teacher.email && password === validCredentials.teacher.password) {
+      onLogin("teacher");
+    } else if (email === validCredentials.student.email && password === validCredentials.student.password) {
+      onLogin("student");
     } else {
       setErrorMessage("Incorrect email or password.");
     }
   };
-  
 
   const checkPasswordStrength = (password: string) => {
     const strongPasswordRegex =
@@ -144,4 +143,4 @@ const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
   );
 };
 
-export default Student_Login;
+export default Login;
