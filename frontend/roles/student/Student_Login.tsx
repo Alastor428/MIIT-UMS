@@ -9,7 +9,7 @@ import {
   Icon,
 } from "native-base";
 import { AntDesign } from "@expo/vector-icons";
-
+import { user_login } from "@/api/user/user-login.api";
 const Student_Login = ({ setIsAuthenticated }: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,42 +26,53 @@ const Student_Login = ({ setIsAuthenticated }: any) => {
   };
 
   const handleLogin = () => {
-    setErrorMessage("");
-
-    if (!email || !password) {
-      setErrorMessage("Email and password are required.");
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      setErrorMessage("Invalid email format.");
-      return;
-    }
-
-    if (email === validEmail && password === validPassword) {
-      setIsAuthenticated(true);
-    } else {
-      setErrorMessage("Incorrect email or password.");
-    }
-  };
-
-  const checkPasswordStrength = (password: string) => {
-    const strongPasswordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    const weakPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
-
-    if (strongPasswordRegex.test(password)) {
-      setPasswordStrength("Strong");
-    } else if (weakPasswordRegex.test(password)) {
-      setPasswordStrength("Weak");
-    } else {
-      setPasswordStrength("Very Weak");
-    }
+    const loginData = {
+      email: email,
+      password: password,
+    };
+    console.log(loginData);
+    user_login<{ token: string }>(loginData)
+      .then((response) => {
+        if (response) {
+          console.log("Login successful:", response);
+        } else {
+          console.log("Login failed.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    //   setErrorMessage("");
+    //   if (!email || !password) {
+    //     setErrorMessage("Email and password are required.");
+    //     return;
+    //   }
+    //   if (!isValidEmail(email)) {
+    //     setErrorMessage("Invalid email format.");
+    //     return;
+    //   }
+    //   if (email === validEmail && password === validPassword) {
+    //     setIsAuthenticated(true);
+    //   } else {
+    //     setErrorMessage("Incorrect email or password.");
+    //   }
+    // };
+    // const checkPasswordStrength = (password: string) => {
+    //   const strongPasswordRegex =
+    //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    //   const weakPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    //   if (strongPasswordRegex.test(password)) {
+    //     setPasswordStrength("Strong");
+    //   } else if (weakPasswordRegex.test(password)) {
+    //     setPasswordStrength("Weak");
+    //   } else {
+    //     setPasswordStrength("Very Weak");
+    //   }
   };
 
   const handlePasswordChange = (password: string) => {
     setPassword(password);
-    checkPasswordStrength(password);
+    // checkPasswordStrength(password);
   };
 
   return (

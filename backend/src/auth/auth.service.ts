@@ -115,7 +115,8 @@ export class AuthService {
     const tokens = await this.generateUserTokens(user._id);
     return {
       ...tokens,
-      userId: user._id
+      userId: user._id,
+      role: user.role
     };
   }
 

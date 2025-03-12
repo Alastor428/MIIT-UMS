@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/auth/schemas/user.schema';
 import mongoose, { Model, Types } from 'mongoose';
@@ -116,7 +115,7 @@ export class AdminService {
     return await this.adminModel.findById(id)
   }
 
-  async update(id: string, updateAdminDto: UpdateAdminDto) {
+  async update(id: string, updateAdminDto: CreateAdminDto) {
     const admin = await this.adminModel.findById(id);
     if (!admin) {
       throw new NotFoundException(`Admin with ID ${id} not found`);
