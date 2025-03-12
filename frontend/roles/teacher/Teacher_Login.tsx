@@ -11,19 +11,19 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 
 // Define the props type
-interface StudentLoginProps {
+interface TeacherLoginProps {
   onLogin: (email: string) => void; // Define the type of onLogin
 }
 
-const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
+const Teacher_Login: React.FC<TeacherLoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const validEmail = "ykl@email.com";
-  const validPassword = "Ykl123!!";
+  const validEmail = "zarchi@email.com";
+  const validPassword = "zar123!!";
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -32,24 +32,23 @@ const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
 
   const handleLogin = () => {
     setErrorMessage("");
-  
+
     if (!email || !password) {
       setErrorMessage("Email and password are required.");
       return;
     }
-  
+
     if (!isValidEmail(email)) {
       setErrorMessage("Invalid email format.");
       return;
     }
-  
-    if (email.toLowerCase() === validEmail.toLowerCase() && password === validPassword) {
+
+    if (email === validEmail && password === validPassword) {
       onLogin(email);
     } else {
       setErrorMessage("Incorrect email or password.");
     }
   };
-  
 
   const checkPasswordStrength = (password: string) => {
     const strongPasswordRegex =
@@ -144,4 +143,4 @@ const Student_Login: React.FC<StudentLoginProps> = ({ onLogin }) => {
   );
 };
 
-export default Student_Login;
+export default Teacher_Login;

@@ -120,7 +120,9 @@ const Student_Layout: React.FC = () => {
           ),
         })}
       />
+      
     </Drawer.Navigator>
+    
   );
 };
 

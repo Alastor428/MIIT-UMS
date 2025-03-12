@@ -1,21 +1,33 @@
 import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-//import { createStackNavigator } from "@react-navigation/stack";
 import { NativeBaseProvider } from "native-base";
-import Student_Login from "@/roles/student/Student_Login";
-import Student_Layout from "@/roles/student/Student_Layout"; // Ensure the correct path
+import Login from "@/roles/student/Login";// Import the Login component
+import Student_Layout from "@/roles/student/Student_Layout"; // Import Student layout
+import Admin_Layout from "@/roles/admin/Admin_Layout"; // Import Admin layout
+import Teacher_Layout from "@/roles/teacher/Teacher_Layout"; // Import Teacher layout
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const App = () => {
+  const [role, setRole] = useState<string | null>(null); // Keep track of the role
+
+  // Handle login, setting the role based on successful login
+  const handleLogin = (role: string) => {
+    setRole(role);
+  };
 
   return (
     <NativeBaseProvider>
-      {/* Conditionally render based on authentication */}
-      {isAuthenticated ? (
+      {/* Conditionally render based on the role */}
+      {role === "admin" ? (
+        <Admin_Layout />
+      ) : role === "teacher" ? (
+        <Teacher_Layout />
+      ) : role === "student" ? (
         <Student_Layout />
       ) : (
-        <Student_Login setIsAuthenticated={setIsAuthenticated} />
+        // Show the login page if no role is set
+        <Login onLogin={handleLogin} />
       )}
     </NativeBaseProvider>
   );
-}
+};
+
+export default App;

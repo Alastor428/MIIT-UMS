@@ -1,3 +1,4 @@
+
 // navigationTypes.ts
 export type DrawerParamList = {
   Dashboard: undefined;
@@ -7,5 +8,4 @@ export type DrawerParamList = {
   ToDoList: undefined;
   About: undefined;
   Chatbot: undefined;
-  
 };

@@ -1,13 +1,14 @@
 import React from "react";
-import { Box, Avatar, Text, VStack, Pressable ,Button } from "native-base";
+import { Box, Avatar, Text, VStack, Pressable, Button } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerParamList } from "./navigationTypes";
+
 interface SidebarProps {
   navigation: DrawerNavigationProp<DrawerParamList>;
 }
 
-const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
-  
+const Teacher_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
+ 
   return (
     <Box flex={1} bg="white" p={4}>
       {/* Profile Section */}
@@ -19,10 +20,10 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           }}
         />
         <Text fontSize="lg" fontWeight="bold" mt={3}>
-          Ye Khant Lwin
+          Daw Zar Chi Su Su Hlaing
         </Text>
         <Text fontSize="md" color="gray.500">
-          Role No: 2021-MIIT-CSE-091
+          Professor
         </Text>
       </Box>
 
@@ -49,9 +50,12 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           <Text fontSize="md">Chatbot</Text>
         </Pressable>
       </VStack>
-     
+      {/* Logout Button
+      <Button mt={6} onPress={handleLogout}>
+        Logout
+      </Button> */}
     </Box>
   );
 };
 
-export default Student_Sidebar;
+export default Teacher_Sidebar;
