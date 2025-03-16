@@ -226,6 +226,14 @@ export class AuthService {
 
   }
 
+  async deleteUser(userId: string) {
+    const user = await this.UserModel.findById(userId)
+    if (!user) {
+      throw new NotFoundException("User not found")
+    }
+    await this.UserModel.deleteOne({ _id: userId })
+  }
+
 
 
 }

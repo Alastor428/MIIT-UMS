@@ -19,12 +19,12 @@ export class StudentController {
   @Post('create/:userId')
   async createStudent(
     @Param('userId') userId: string, // Get the userId from the route parameter
-    @Body() createStudentDto: { batch: string }, // Only accept student-specific data
+    @Body() createStudentDto: { batch: string, roll_no: string }, // Only accept student-specific data
   ) {
-    const { batch } = createStudentDto;
+    const { batch, roll_no } = createStudentDto;
 
     // Delegate to the StudentService
-    const student = await this.studentService.createStudent(userId, { batch });
+    const student = await this.studentService.createStudent(userId, { batch, roll_no });
 
     return {
       message: 'Student record created successfully',

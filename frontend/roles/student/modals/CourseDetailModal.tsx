@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Text, VStack } from "native-base";
-import { Course } from "./Student_Timetable";
+import { Course } from "../Student_Timetable";
 
 interface CourseDetailsModalProps {
   isOpen: boolean;

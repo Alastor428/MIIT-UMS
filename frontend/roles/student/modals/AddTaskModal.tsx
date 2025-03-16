@@ -9,7 +9,7 @@ import {
   CheckIcon,
 } from "native-base";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Task } from "./types";
+import { Task } from "../types";
 
 interface AddTaskModalProps {
   isVisible: boolean;

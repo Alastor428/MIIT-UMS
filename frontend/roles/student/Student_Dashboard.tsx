@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Text, Button, VStack, HStack, Pressable } from "native-base";
-import AddCourseModal from "./AddCourseModal";
+import AddCourseModal from "./modals/AddCourseModal";
 import ViewCourseModal from "./ViewCourseModal";
-import AskingModal from "./AskingModal";
-import ChooseCourseModal from "./ChooseCourseModal";
+import AskingModal from "./modals/AskingModal";
+import ChooseCourseModal from "./modals/ChooseCourseModal";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { get_student_timetable } from "@/api/student/get-student-timetable.api";
 
 interface Course {
   name: string;
@@ -17,7 +18,84 @@ interface Course {
   faculty: string;
 }
 
-const Student_Dashboard = () => {
+interface FetchedCourse {
+  _id: string;
+  courseCode: string;
+  courseName: string;
+  credit: number;
+  faculty: string;
+  instructor: string;
+  note: string;
+  room: string;
+}
+
+interface FetchedTimeSlot {
+  time: string;
+  Monday?: FetchedCourse;
+  Tuesday?: FetchedCourse;
+  Wednesday?: FetchedCourse;
+  Thursday?: FetchedCourse;
+  Friday?: FetchedCourse;
+}
+
+type FetchedTimetable = FetchedTimeSlot[];
+
+const dayMapping: { [key: string]: string } = {
+  Mon: "Monday",
+  Tue: "Tuesday",
+  Wed: "Wednesday",
+  Thu: "Thursday",
+  Fri: "Friday",
+};
+
+interface StudentDashboardProps {
+  token: string;
+}
+
+const Student_Dashboard: React.FC<StudentDashboardProps> = ({ token }) => {
+  const [timetableData, setTimetableData] = useState<FetchedTimetable>([]);
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const morningTimeSlots = ["9:00-9:50", "10:00-10:50", "11:00-11:50"];
+  const eveningTimeSlots = ["1:00-1:50", "2:00-2:50", "3:00-3:50", "4:00-4:50"];
+
+  const transformedTimetableData = (timetable: FetchedTimetable): Course[] => {
+    const courses: Course[] = [];
+
+    timetable.forEach((timeSlot) => {
+      const time = timeSlot.time;
+      days.forEach((day) => {
+        const abbreviatedDay = dayMapping[day];
+        const courseData = timeSlot[abbreviatedDay as keyof FetchedTimeSlot];
+        if (
+          courseData &&
+          typeof courseData === "object" &&
+          !Array.isArray(courseData)
+        ) {
+          courses.push({
+            name: courseData.courseName,
+            time: time,
+            day: day,
+            room: courseData.room,
+            code: courseData.courseCode,
+            instructor: courseData.instructor,
+            credit: courseData.credit.toString(),
+            faculty: courseData.faculty,
+          });
+        }
+      });
+    });
+
+    return courses;
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await get_student_timetable(token);
+      const transformedCourses = transformedTimetableData(data.timetable);
+      setCourses(transformedCourses);
+    };
+    fetchData();
+  }, [token]);
+
   const [isAskingModalOpen, setIsAskingModalOpen] = useState(false);
   const [isChooseCourseModalOpen, setIsChooseCourseModalOpen] = useState(false);
   const [selectedView, setSelectedView] = useState<"morning" | "evening">(
@@ -27,252 +105,7 @@ const Student_Dashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [newCourse, setNewCourse] = useState<Course | null>(null);
 
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  const morningTimeSlots = ["9:00-9:50", "10:00-10:50", "11:00-11:50"];
-  const eveningTimeSlots = ["1:00-1:50", "2:00-2:50", "3:00-3:50", "4:00-4:50"];
-
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      name: "CSE 3030",
-      time: "10:00-10:50",
-      day: "Mon",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Dr.Smith",
-      credit: "3",
-      faculty: "Mathematics",
-    },
-    {
-      name: "MATH 3020",
-      time: "11:00-11:50",
-      day: "Mon",
-      room: "201",
-      code: "MATH 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "1:00-1:50",
-      day: "Mon",
-      room: "201",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "HSS C013",
-      time: "2:00-2:50",
-      day: "Mon",
-      room: "201",
-      code: "HSS C013",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3041",
-      time: "3:00-3:50",
-      day: "Mon",
-      room: "201",
-      code: "CSE 3041",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3041",
-      time: "4:00-4:50",
-      day: "Mon",
-      room: "201",
-      code: "CSE 3041",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3040",
-      time: "9:00-9:50",
-      day: "Tue",
-      room: "201",
-      code: "CSE 3040",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "10:00-10:50",
-      day: "Tue",
-      room: "201",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3050",
-      time: "11:00-11:50",
-      day: "Tue",
-      room: "201",
-      code: "CSE 3050",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3020",
-      time: "2:00-2:50",
-      day: "Tue",
-      room: "201",
-      code: "CSE 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3030",
-      time: "9:00-9:50",
-      day: "Wed",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3040",
-      time: "11:00-11:50",
-      day: "Wed",
-      room: "201",
-      code: "CSE 3040",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3030",
-      time: "1:00-1:50",
-      day: "Wed",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3050",
-      time: "2:00-2:50",
-      day: "Wed",
-      room: "201",
-      code: "CSE 3050",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3030",
-      time: "9:00-9:50",
-      day: "Thur",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3020",
-      time: "10:00-10:50",
-      day: "Thur",
-      room: "201",
-      code: "CSE 3020",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3050",
-      time: "11:00-11:50",
-      day: "Thur",
-      room: "201",
-      code: "CSE 3050",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3040",
-      time: "1:00-1:50",
-      day: "Thur",
-      room: "201",
-      code: "CSE 3040",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3060",
-      time: "2:00-2:50",
-      day: "Thur",
-      room: "201",
-      code: "CSE 3060",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "LANG 3020",
-      time: "3:00-3:50",
-      day: "Thur",
-      room: "201",
-      code: "LANG 3020",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3030",
-      time: "9:00-9:50",
-      day: "Fri",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3050",
-      time: "11:00-11:50",
-      day: "Fri",
-      room: "201",
-      code: "CSE 3050",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "CSE 3060",
-      time: "1:00-1:50",
-      day: "Fri",
-      room: "201",
-      code: "CSE 3060",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-    {
-      name: "MATH 3020",
-      time: "3:00-3:50",
-      day: "Fri",
-      room: "201",
-      code: "MATH 3020",
-      instructor: "Prof. Smith",
-      credit: "4",
-      faculty: "Science",
-    },
-  ]);
+  const [courses, setCourses] = useState<Course[]>([]);
 
   const handleCourseClick = (
     course: Course | null,

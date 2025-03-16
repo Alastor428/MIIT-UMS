@@ -22,20 +22,14 @@ import { AdminModule } from 'src/admin/admin.module';
 
       }),
     }),
-    MongooseModule.forFeature([{
-      name: User.name,
-      schema: UserSchema
-    },
-    {
-      name: ResetToken.name,
-      schema: ResetTokenSchema
-    },
-    {
-      name: RefreshToken.name,
-      schema: RefreshTokenSchema
-    },
-
-    ]), forwardRef(() => StudentModule), forwardRef(() => TeacherModule), forwardRef(() => AdminModule)],
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: ResetToken.name, schema: ResetTokenSchema },
+      { name: RefreshToken.name, schema: RefreshTokenSchema },
+    ]),
+    forwardRef(() => StudentModule), // Use forwardRef to avoid circular dependency
+    forwardRef(() => TeacherModule),
+    forwardRef(() => AdminModule),],
   controllers: [AuthController],
   providers: [AuthService, MailService],
   exports: [

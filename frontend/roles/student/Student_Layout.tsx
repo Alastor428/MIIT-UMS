@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { Box, Text } from "native-base";
@@ -8,6 +8,7 @@ import StudentHeader from "./StudentHeader";
 import Student_Timetable from "./Student_Timetable";
 import Student_ToDoList from "./Student_ToDoList";
 import Student_Event from "./Student_Event";
+import { get_student } from "@/api/student/get-student.api";
 
 const Drawer = createDrawerNavigator();
 
@@ -25,11 +26,28 @@ const Screen: React.FC = ({ navigation }: any) => {
   );
 };
 
-const Student_Layout: React.FC = () => {
+interface Student_Layout_Props {
+  token: string;
+}
+
+const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
+  const [studentData, setStudentData] = useState<Record<string, any>>({});
+  const fetchStudentData = async () => {
+    if (!token) return;
+    const studentData = await get_student(token);
+    setStudentData(studentData.student);
+  };
+
+  useEffect(() => {
+    fetchStudentData();
+  }, [token]);
   return (
     <Drawer.Navigator
       drawerContent={(props: DrawerContentComponentProps) => (
-        <Student_Sidebar navigation={props.navigation as any} />
+        <Student_Sidebar
+          navigation={props.navigation as any}
+          studentData={studentData}
+        />
       )}
       screenOptions={{
         drawerStyle: { width: 300 },
@@ -38,7 +56,6 @@ const Student_Layout: React.FC = () => {
     >
       <Drawer.Screen
         name="Dashboard"
-        component={Student_Dashboard}
         options={({ navigation }) => ({
           header: () => (
             <StudentHeader
@@ -47,7 +64,9 @@ const Student_Layout: React.FC = () => {
             />
           ),
         })}
-      />
+      >
+        {(props) => <Student_Dashboard {...props} token={token} />}
+      </Drawer.Screen>
       <Drawer.Screen
         name="Timetable"
         component={Student_Timetable}
@@ -120,9 +139,7 @@ const Student_Layout: React.FC = () => {
           ),
         })}
       />
-      
     </Drawer.Navigator>
-    
   );
 };
 

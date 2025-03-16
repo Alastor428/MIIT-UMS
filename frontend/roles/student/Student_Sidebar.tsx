@@ -1,13 +1,22 @@
-import React from "react";
-import { Box, Avatar, Text, VStack, Pressable ,Button } from "native-base";
+import React, { useEffect, useState } from "react";
+import { Box, Avatar, Text, VStack, Pressable, Button } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerParamList } from "./navigationTypes";
 interface SidebarProps {
   navigation: DrawerNavigationProp<DrawerParamList>;
+  studentData: Record<string, any>;
 }
 
-const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
-  
+const Student_Sidebar: React.FC<SidebarProps> = ({
+  navigation,
+  studentData,
+}) => {
+  const [name, setName] = useState(studentData.user?.name || "Loading...");
+  useEffect(() => {
+    if (studentData.user?.name && studentData.user.name !== name) {
+      setName(studentData.user.name);
+    }
+  }, [studentData.user?.name]);
   return (
     <Box flex={1} bg="white" p={4}>
       {/* Profile Section */}
@@ -19,10 +28,10 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           }}
         />
         <Text fontSize="lg" fontWeight="bold" mt={3}>
-          Ye Khant Lwin
+          {name}
         </Text>
         <Text fontSize="md" color="gray.500">
-          Role No: 2021-MIIT-CSE-091
+          {studentData.roll_no}
         </Text>
       </Box>
 
@@ -49,7 +58,6 @@ const Student_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           <Text fontSize="md">Chatbot</Text>
         </Pressable>
       </VStack>
-     
     </Box>
   );
 };

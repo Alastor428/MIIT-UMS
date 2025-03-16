@@ -32,7 +32,6 @@ export class BatchTimetableService {
   // Method to update teacher timetables based on the courses they teach
   private async updateTeacherTimetables(batch: string, courseDetailsForTeachers: any[], timetableData: any[]) {
     await this.teachertimetableService.addMultipleTimetableEntries(batch, courseDetailsForTeachers, timetableData);
-
   }
 
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, Button, Input, FormControl, Text } from "native-base";
-import { Course } from "./Student_Timetable";
+import { Course } from "../Student_Timetable";
 
 interface AddCourseModalProps {
   isOpen: boolean;

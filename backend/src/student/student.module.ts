@@ -11,8 +11,8 @@ import { CourseDetailsModule } from 'src/course-details/course-details.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Student.name, schema: studentSchema }]),
     forwardRef(() => AuthModule),
+    MongooseModule.forFeature([{ name: Student.name, schema: studentSchema }]),
     CourseDetailsModule,
   ],
   controllers: [StudentController],

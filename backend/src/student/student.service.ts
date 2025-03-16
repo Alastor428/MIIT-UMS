@@ -1,22 +1,30 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { User } from '../auth/schemas/user.schema';
 import { Student } from './schemas/student.schema';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class StudentService {
   constructor(
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
     @InjectModel(User.name) private readonly authModel: Model<User>,
     @InjectModel(Student.name) private readonly studentModel: Model<Student>,
   ) { }
 
-  async createStudent(userId: string, data: { batch: string; }): Promise<Student> {
+  async createStudent(userId: string, data: { batch: string; roll_no: string }): Promise<Student> {
 
     // Validate that the user exists in the database
     const user = await this.authModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+    const usedRoll_no = await this.studentModel.findOne({ roll_no: data.roll_no }).exec();
+    if (usedRoll_no) {
+      await this.authService.deleteUser(userId)
+      throw new ConflictException(`Roll number ${data.roll_no} is already in use`);
     }
     const student = new this.studentModel({
       user: new Types.ObjectId(userId),

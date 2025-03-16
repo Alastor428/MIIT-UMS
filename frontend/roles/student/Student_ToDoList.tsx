@@ -11,9 +11,9 @@ import {
   Pressable, // Import Pressable from NativeBase
 } from "native-base";
 import { Task } from "./types";
-import AddTaskModal from "./AddTaskModal";
 import { Ionicons } from "@expo/vector-icons";
-import EditTaskModal from "./EditTaskModal";
+import EditTaskModal from "./modals/EditTaskModal";
+import AddTaskModal from "./modals/AddTaskModal";
 
 const Student_ToDoList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);

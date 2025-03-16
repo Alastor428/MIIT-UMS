@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Modal, Button, VStack } from "native-base";
 import { Course } from "./Student_Timetable";
-import CourseDetailsModal from "./CourseDetailModal";
-import EditCourseModal from "./EditCourseModal";
+import CourseDetailsModal from "./modals/CourseDetailModal";
+import EditCourseModal from "./modals/EditCourseModal";
 
 interface OptionsModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Text, Button, VStack, HStack, Pressable } from "native-base";
-import AddCourseModal from "./AddCourseModal";
+import AddCourseModal from "./modals/AddCourseModal";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import OptionsModal from "./OpnionsModal";
 

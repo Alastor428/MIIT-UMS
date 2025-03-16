@@ -1,10 +1,18 @@
 import React, { useState } from "react";
-import { Box, Button, Input, Text, VStack, IconButton, Icon } from "native-base";
+import {
+  Box,
+  Button,
+  Input,
+  Text,
+  VStack,
+  IconButton,
+  Icon,
+} from "native-base";
 import { AntDesign } from "@expo/vector-icons";
+import { user_login } from "@/api/user/user-login.api";
 
-// Define the props type once
 interface LoginProps {
-  onLogin: (role: string) => void; // Passing role after successful login
+  onLogin: (role: string, accessToken: string) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
@@ -26,28 +34,30 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const handleLogin = () => {
-    setErrorMessage("");
+    const loginData = {
+      email: email,
+      password: password,
+    };
+    console.log(loginData);
+    user_login<{ accessToken: string; role: string }>(loginData)
+      .then((response) => {
+        if (response) {
+          console.log("Login successful:", response);
 
-    if (!email || !password) {
-      setErrorMessage("Email and password are required.");
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      setErrorMessage("Invalid email format.");
-      return;
-    }
-
-    // Check if the email and password match for any role
-    if (email === validCredentials.admin.email && password === validCredentials.admin.password) {
-      onLogin("admin");
-    } else if (email === validCredentials.teacher.email && password === validCredentials.teacher.password) {
-      onLogin("teacher");
-    } else if (email === validCredentials.student.email && password === validCredentials.student.password) {
-      onLogin("student");
-    } else {
-      setErrorMessage("Incorrect email or password.");
-    }
+          if (response.role == "admin") {
+            onLogin("admin", response.accessToken);
+          } else if (response.role == "teacher") {
+            onLogin("teacher", response.accessToken);
+          } else if (response.role == "student") {
+            onLogin("student", response.accessToken);
+          }
+        } else {
+          console.log("Login failed.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   const checkPasswordStrength = (password: string) => {
@@ -66,7 +76,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handlePasswordChange = (password: string) => {
     setPassword(password);
-    checkPasswordStrength(password);
+    // checkPasswordStrength(password);
   };
 
   return (
@@ -129,9 +139,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               ? "yellow.500"
               : "red.500"
           }
-        >
-          Password Strength: {passwordStrength}
-        </Text>
+        ></Text>
 
         {errorMessage && <Text color="red.500">{errorMessage}</Text>}
 
