@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   Dimensions,
@@ -10,11 +10,16 @@ import { Box, Text, VStack, HStack, Button } from "native-base";
 import { Calendar, DateData } from "react-native-calendars";
 import MainEventModal from "../student/MainEventModal";
 import CreateEventForm from "./CreateEventForm";
+import {
+  get_all_events,
+  get_events_by_priority,
+} from "@/api/event/get-event.api";
+import { create_event } from "@/api/event/create-event.api";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 interface MainEvent {
-  id: number;
+  id: string;
   title: string;
   details: string;
   time: string;
@@ -23,29 +28,56 @@ interface MainEvent {
   sender: string;
 }
 
-const Event_Planner: React.FC = () => {
-  const [mainEvents, setMainEvents] = useState<MainEvent[]>([
-    {
-      id: 1,
-      title: "Special Project Talk Show 1",
-      details:
-        "ကျောင်းတွင်း Special Projectများနှင့်ပတ်သတ်၍ ဆွေးနွေးတိုင်ပင်လိုသည်များကို ကျောင်းသူကျောင်းသားနှင့် ကျောင်းသင်ကြားရေး တာဝန်ရှိသူများ အကြား ရှင်းရှင်းလင်းလင်းနှင့် တိကျစွာ တင်ပြနိုင်ရန် 2021 batch ကျောင်းသူ/ကျောင်းသားများမှ အစ 2024 batch ကျောင်းသူ/ကျောင်းသားများ အားလုံးပါဝင်တက်ရောက်ပါရန် ဖိတ်ကြားအပ်ပါသည်။",
-      time: "4:00 - 6:00 PM",
-      place: "Room 101",
-      date: "2025-02-15",
-      sender: "Faculty of Engineering",
-    },
-    {
-      id: 2,
-      title: "ဟောပြောပွဲ",
-      details:
-        "ယာဉ်အန္တရာယ်ကင်းရှင်းရေး အသိပညာပေးဟောပြောပွဲအခမ်းအနားကို ၁၇-၁-၂၀၂၅ ရက်နေ့ Auditorium ခန်းမ၌ ကျင်းပပြုလုပ်သွားမည်ဖြစ်ပါသဖြင့် ၂၀၂၄-၂၀၂၅ ပညာသင်နှစ် သင်တန်းနှစ် အသီးသီးတွင် တက်‌ရောက်ပညာသင်ကြားနေသော ကျောင်းသား၊ ကျောင်းသူများအနေဖြင့် Uniform အပြည့်အစုံဝတ်ဆင်၍ နံနက် ၁၀နာရီအချိန်တွင် ခန်းမအတွင်း နေရာယူပေးကြပါရန် အသိပေး အကြောင်းကြားပါသည်။",
-      time: "1:00 - 3:00 PM",
-      place: "Hall",
-      date: "2025-02-10",
-      sender: "Student Affair",
-    },
-  ]);
+interface CreateEvent {
+  title: string;
+  details: string;
+  time: string;
+  place: string;
+  date: string; // Ensure the date is a string
+  sender: string;
+  priority: string;
+}
+
+interface Raw {
+  title: string;
+  details: string;
+  timeFrom: string;
+  timeTo: string;
+  place: string;
+  date: string; // Ensure the date is a string
+  sender: string;
+  priority: string;
+}
+
+const formatTime = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const formattedHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+  return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+};
+
+interface Event_Planner_Props {
+  token: string;
+}
+
+const Event_Planner: React.FC<Event_Planner_Props> = ({ token }) => {
+  const [mainEvents, setMainEvents] = useState<MainEvent[]>([]);
+
+  const handleRefresh = () => {
+    const fetchData = async () => {
+      const response = await get_events_by_priority("high");
+      setMainEvents(response);
+    };
+    fetchData();
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await get_events_by_priority("high");
+      setMainEvents(response);
+    };
+    fetchData();
+  }, []);
 
   const [isMainEventModalVisible, setMainEventModalVisible] = useState(false);
   const [selectedMainEvent, setSelectedMainEvent] = useState<MainEvent | null>(
@@ -71,18 +103,26 @@ const Event_Planner: React.FC = () => {
     setCreateEventFormVisible(false);
   };
 
-  const handleCreateEvent = (newEvent: any) => {
-    const formattedTime = `${newEvent.timeFrom} - ${newEvent.timeTo}`;
+  const handleCreateEvent = async (newEvent: Raw) => {
+    const time = `${formatTime(newEvent.timeFrom)} - ${formatTime(
+      newEvent.timeTo
+    )}`;
+    const [day, month, year] = newEvent.date.split("/");
+    const formattedDate = `${year}-${month}-${day}`;
 
-    setMainEvents((prevEvents) => [
-      ...prevEvents,
-      {
-        ...newEvent,
-        id: prevEvents.length + 1,
-        time: formattedTime,
-      },
-    ]);
+    const formattedEvent: CreateEvent = {
+      title: newEvent.title,
+      details: newEvent.details,
+      time,
+      place: newEvent.place,
+      date: formattedDate,
+      sender: newEvent.sender,
+      priority: newEvent.priority,
+    };
 
+    const response = await create_event(formattedEvent);
+    console.log(response);
+    handleRefresh();
     closeCreateEventForm();
   };
 
@@ -139,7 +179,7 @@ const Event_Planner: React.FC = () => {
             )}
           </View>
           <Text fontSize="lg" color="black" marginBottom={-4}>
-            {date}
+            {date.split("T")[0]}
           </Text>
 
           <HStack justifyContent="space-between" alignItems="center">
@@ -157,7 +197,7 @@ const Event_Planner: React.FC = () => {
                   time,
                   place,
                   sender,
-                  date,
+                  date: date.split("T")[0],
                 })
               }
             >
@@ -173,7 +213,7 @@ const Event_Planner: React.FC = () => {
   const markedDates: { [key: string]: { selected: boolean } } = {};
 
   mainEvents.forEach((event) => {
-    markedDates[event.date] = { selected: true }; // Mark the event date
+    markedDates[event.date.split("T")[0]] = { selected: true }; // Mark the event date
   });
 
   return (

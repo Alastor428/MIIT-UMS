@@ -48,9 +48,9 @@ export class TeacherController {
     return await this.teacherService.getTeacherByUserId(userId);
   }
 
-  @Get('email')
+  @Get('get-teacher/:email')
   async getTeacher(
-    @Body('email') email: string,
+    @Param('email') email: string,
   ): Promise<Teacher> {
     return await this.teacherService.getTeacher(email);
   }

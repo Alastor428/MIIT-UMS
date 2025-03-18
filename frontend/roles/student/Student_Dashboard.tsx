@@ -6,37 +6,7 @@ import AskingModal from "./modals/AskingModal";
 import ChooseCourseModal from "./modals/ChooseCourseModal";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { get_student_timetable } from "@/api/student/get-student-timetable.api";
-
-interface Course {
-  name: string;
-  time: string;
-  day: string;
-  room: string;
-  code: string;
-  instructor: string;
-  credit: string;
-  faculty: string;
-}
-
-interface FetchedCourse {
-  _id: string;
-  courseCode: string;
-  courseName: string;
-  credit: number;
-  faculty: string;
-  instructor: string;
-  note: string;
-  room: string;
-}
-
-interface FetchedTimeSlot {
-  time: string;
-  Monday?: FetchedCourse;
-  Tuesday?: FetchedCourse;
-  Wednesday?: FetchedCourse;
-  Thursday?: FetchedCourse;
-  Friday?: FetchedCourse;
-}
+import { Course, CourseDetail, FetchedTimeSlot } from "./types";
 
 type FetchedTimetable = FetchedTimeSlot[];
 
@@ -50,10 +20,13 @@ const dayMapping: { [key: string]: string } = {
 
 interface StudentDashboardProps {
   token: string;
+  studentID: string;
 }
 
-const Student_Dashboard: React.FC<StudentDashboardProps> = ({ token }) => {
-  const [timetableData, setTimetableData] = useState<FetchedTimetable>([]);
+const Student_Dashboard: React.FC<StudentDashboardProps> = ({
+  token,
+  studentID,
+}) => {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const morningTimeSlots = ["9:00-9:50", "10:00-10:50", "11:00-11:50"];
   const eveningTimeSlots = ["1:00-1:50", "2:00-2:50", "3:00-3:50", "4:00-4:50"];
@@ -87,31 +60,50 @@ const Student_Dashboard: React.FC<StudentDashboardProps> = ({ token }) => {
 
     return courses;
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await get_student_timetable(token);
-      const transformedCourses = transformedTimetableData(data.timetable);
-      setCourses(transformedCourses);
-    };
-    fetchData();
-  }, [token]);
+
+  const refreshTimetable = async () => {
+    const data = await get_student_timetable(token);
+    setCourseDetails(data.course_details);
+    setCourses(transformedTimetableData(data.timetable));
+  };
 
   const [isAskingModalOpen, setIsAskingModalOpen] = useState(false);
   const [isChooseCourseModalOpen, setIsChooseCourseModalOpen] = useState(false);
   const [selectedView, setSelectedView] = useState<"morning" | "evening">(
     "morning"
   );
+  const [selectedTime, setSelectedTime] = useState<string>();
+  const [selectedDay, setSelectedDay] = useState<string>();
+
+  const date_time = {
+    day: selectedDay,
+    time: selectedTime,
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [newCourse, setNewCourse] = useState<Course | null>(null);
 
   const [courses, setCourses] = useState<Course[]>([]);
+  const [courseDetails, setCourseDetails] = useState<CourseDetail[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await get_student_timetable(token);
+      const transformedCourses = transformedTimetableData(data.timetable);
+      setCourseDetails(data.course_details);
+      setCourses(transformedCourses);
+    };
+    fetchData();
+  }, [token]);
 
   const handleCourseClick = (
     course: Course | null,
     timeSlot: string,
     day: string
   ) => {
+    setSelectedTime(timeSlot);
+    setSelectedDay(dayMapping[day]);
     if (!course) {
       setNewCourse({
         name: "",
@@ -131,15 +123,6 @@ const Student_Dashboard: React.FC<StudentDashboardProps> = ({ token }) => {
       setIsModalOpen(true); // Open ViewCourseModal when an existing course is selected
     }
   };
-
-  const handleCourseSubmit = () => {
-    if (newCourse) {
-      setCourses((prevCourses) => [...prevCourses, newCourse]);
-      setNewCourse(null);
-      setIsModalOpen(false);
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -346,15 +329,17 @@ const Student_Dashboard: React.FC<StudentDashboardProps> = ({ token }) => {
               <ChooseCourseModal
                 isOpen={isChooseCourseModalOpen}
                 onClose={() => setIsChooseCourseModalOpen(false)}
-                courses={[]} // Provide the courses array for ChooseCourseModal
-                onSelectCourse={() => {}}
+                courses={courseDetails}
+                date_time={date_time}
+                studendId={studentID}
+                onCourseAdded={refreshTimetable}
               />
               <AddCourseModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                newCourse={newCourse}
-                setNewCourse={setNewCourse}
-                handleCourseSubmit={handleCourseSubmit}
+                date_time={date_time}
+                onCourseAdded={refreshTimetable}
+                studentId={studentID}
               />
             </>
           ) : selectedCourse ? (

@@ -21,6 +21,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
     date: "",
     place: "",
     sender: "",
+    priority: "high",
   });
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -31,16 +32,15 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
   >(null);
 
   const handleDateConfirm = (_: any, selectedDate?: Date) => {
-  if (selectedDate) {
-    setSelectedDate(selectedDate);
-    setEventDetails({
-      ...eventDetails,
-      date: selectedDate.toLocaleDateString(),
-    });
-  }
-  setDatePickerVisibility(false);
-};
-
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+      setEventDetails({
+        ...eventDetails,
+        date: selectedDate.toLocaleDateString(),
+      });
+    }
+    setDatePickerVisibility(false);
+  };
 
   const handleTimeConfirm = (event: any, selectedTime: Date | undefined) => {
     if (selectedTimeField) {
@@ -62,6 +62,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
       date: "",
       place: "",
       sender: "",
+      priority: "high",
     });
   };
 
@@ -98,8 +99,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
                 }}
                 color={"#3B82F6"}
               >
-               From: {eventDetails.timeFrom || "Select Time"}
-
+                From: {eventDetails.timeFrom || "Select Time"}
               </Button>
               <Button
                 flex={1}
@@ -134,7 +134,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({
                 setEventDetails({ ...eventDetails, sender: text })
               }
             />
-            </VStack>
+          </VStack>
         </Modal.Body>
         <Modal.Footer>
           <HStack space={3}>

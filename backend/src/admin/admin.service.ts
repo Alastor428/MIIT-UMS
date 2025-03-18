@@ -87,7 +87,10 @@ export class AdminService {
   }
 
   async getAllAdmins() {
-    return await this.adminModel.find().exec();
+    return await this.adminModel.find().populate({
+      path: 'user',
+      select: 'name email'
+    }).exec();
   }
 
   async deleteAdmin(adminId: string) {

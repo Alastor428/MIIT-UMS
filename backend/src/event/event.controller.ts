@@ -8,7 +8,8 @@ export class EventController {
   constructor(private readonly eventService: EventService) { }
 
   @Post('create')
-  create(@Body() createEventDto: CreateEventDto) {
+  async create(@Body() createEventDto: CreateEventDto) {
+    console.log("Received Event Data:", createEventDto);
     return this.eventService.create(createEventDto);
   }
 
@@ -17,8 +18,8 @@ export class EventController {
     return this.eventService.findAll();
   }
 
-  @Get('/get-event')
-  findOne(@Body('title') title: string) {
+  @Get('get-event/:title')
+  findOne(@Param('title') title: string) {
     return this.eventService.findOne(title);
   }
 

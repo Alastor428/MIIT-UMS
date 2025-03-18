@@ -14,12 +14,13 @@ export const get_student = async (token: string) => {
     }
 }
 
-export const get_student_by_email = async (email: Record<string, any>) => {
+export const get_student_by_email = async (email: string) => {
     try {
-        const response = await axios.get(`http://192.168.137.1:3000/api/student/email`, email);
+        const response = await axios.get(`http://192.168.137.1:3000/api/student/get-student/${email}`);
+        console.log(response.data)
         return response.data;
     } catch (error: any) {
-        throw new error;
+        throw error;
     }
 }
 

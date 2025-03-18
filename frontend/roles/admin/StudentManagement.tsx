@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   HStack,
@@ -15,43 +15,82 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import StudentAccountCreateModal from "./StudentAccountCreateModal";
 import StudentOptionsModal from "./StudentOptionsModal";
+import {
+  get_all_students,
+  get_student_by_email,
+} from "@/api/student/get-student.api";
+import { delete_student } from "@/api/student/delete-student.api";
+
+export type Student = {
+  id: string;
+  name: string;
+  roll_no: string;
+  email: string;
+  batch: string;
+};
 
 const StudentManagement = () => {
   const [batch, setBatch] = useState("");
   const [program, setProgram] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [students, setStudents] = useState([
-    { id: 1, name: "Swan Lynn Htun", idNumber: "2021-MIIT-CSE-068", email: "swanlynn@example.com" },
-    { id: 2, name: "Mya Thida", idNumber: "2022-MIIT-ECE-072", email: "myathida@example.com" },
-    // Add more students as needed
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<{
-    id: number;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await get_all_students();
+      const formattedStudents = response.students.map((student: any) => ({
+        id: student._id,
+        name: student.user.name,
+        roll_no: student.roll_no,
+        email: student.user.email,
+        batch: student.batch,
+      }));
+      setStudents(formattedStudents);
+    };
+    fetchData();
+  }, []);
+
+  const [selectedStudent, setSelectedStudent] = useState<Student>(students[1]);
+
+  const addStudent = (student: {
     name: string;
     idNumber: string;
     email: string;
-  } | null>(null);
-
-  const addStudent = (student: { name: string; idNumber: string; email: string }) => {
-    setStudents([...students, { id: students.length + 1, ...student }]);
+  }) => {
+    // setStudents([...students, { id: students.length + 1, ...student }]);
   };
 
-  const deleteStudent = (id: number) => {
-    setStudents(students.filter((student) => student.id !== id));
+  const deleteStudent = async (email: string) => {
+    const student = await get_student_by_email(email);
+    console.log(student);
+    if (student) {
+      const response = await delete_student(student._id);
+      console.log(response);
+    }
   };
 
-  const updateStudent = (updatedStudent: { id: number; name: string; idNumber: string; email: string }) => {
-    setStudents(students.map((student) => (student.id === updatedStudent.id ? updatedStudent : student)));
+  const updateStudent = (updatedStudent: {
+    id: string;
+    name: string;
+    roll_no: string;
+    email: string;
+  }) => {
+    // setStudents(
+    //   students.map((student) =>
+    //     student.id === updatedStudent.id ? updatedStudent : student
+    //   )
+    // );
   };
-
-  const filteredStudents = students.filter(
-    (student) =>
-      (!batch || student.idNumber.startsWith(batch)) &&
-      (!program || student.idNumber.includes(program)) &&
+  const filteredStudents = students.filter((student) => {
+    const programCode = student.roll_no.split("-")[2]; // Extracts "CSE" from "2021-MIIT-CSE-001"
+    return (
+      (!batch || student.batch === batch) &&
+      (!program || programCode === program) &&
       student.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    );
+  });
 
   return (
     <Box safeArea p="4">
@@ -64,8 +103,15 @@ const StudentManagement = () => {
           onValueChange={(value) => setBatch(value)}
         >
           <Select.Item label="All Batches" value="" />
-          <Select.Item label="2021" value="2021" />
-          <Select.Item label="2022" value="2022" />
+          {[...new Set(students.map((student) => student.batch))].map(
+            (batchName) => (
+              <Select.Item
+                key={batchName}
+                label={batchName}
+                value={batchName}
+              />
+            )
+          )}
         </Select>
 
         <Select
@@ -83,7 +129,9 @@ const StudentManagement = () => {
           flex="1"
           placeholder="Search..."
           onChangeText={(text) => setSearchTerm(text)}
-          InputLeftElement={<Icon as={Ionicons} name="search-outline" size="sm" ml="2" />}
+          InputLeftElement={
+            <Icon as={Ionicons} name="search-outline" size="sm" ml="2" />
+          }
         />
       </HStack>
 
@@ -104,7 +152,7 @@ const StudentManagement = () => {
 
         <FlatList
           data={filteredStudents}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <HStack
               justifyContent="space-between"
@@ -120,7 +168,7 @@ const StudentManagement = () => {
                 <VStack ml="3">
                   <Text fontWeight="bold">{item.name}</Text>
                   <Text fontSize="xs" color="gray.500">
-                    {item.idNumber}
+                    {item.roll_no}
                   </Text>
                 </VStack>
               </HStack>

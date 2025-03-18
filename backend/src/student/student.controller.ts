@@ -34,8 +34,8 @@ export class StudentController {
 
   // Get student
 
-  @Get('email')
-  async findOneStudent(@Body('email') email: string) {
+  @Get('get-student/:email')
+  async findOneStudent(@Param('email') email: string) {
     const studentData = await this.studentService.findStudentByEmail(email);
     return studentData;
   }

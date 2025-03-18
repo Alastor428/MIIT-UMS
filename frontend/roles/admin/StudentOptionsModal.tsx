@@ -8,16 +8,17 @@ import {
   HStack,
   AlertDialog,
 } from "native-base";
+import { Student } from "./StudentManagement";
 
 interface StudentOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student: { id: number; name: string; idNumber: string; email: string } | null;
-  onDelete: (id: number) => void;
+  student: Student;
+  onDelete: (id: string) => void;
   onUpdate: (updatedStudent: {
-    id: number;
+    id: string;
     name: string;
-    idNumber: string;
+    roll_no: string;
     email: string;
   }) => void;
 }
@@ -31,13 +32,8 @@ const StudentOptionsModal: React.FC<StudentOptionsModalProps> = ({
 }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [editedStudent, setEditedStudent] = useState<{
-    id: number;
-    name: string;
-    idNumber: string;
-    email: string;
-  } | null>(student);  // Initialize with student or null
-  
+  const [editedStudent, setEditedStudent] = useState<Student>(student); // Initialize with student or null
+
   const cancelRef = useRef(null);
 
   useEffect(() => {
@@ -68,7 +64,7 @@ const StudentOptionsModal: React.FC<StudentOptionsModalProps> = ({
           <Modal.Body>
             <VStack space={4}>
               <Text fontWeight="bold">Name: {student.name}</Text>
-              <Text>Roll Number: {student.idNumber}</Text>
+              <Text>Roll Number: {student.roll_no}</Text>
               <Text>Email: {student.email}</Text>
             </VStack>
           </Modal.Body>
@@ -101,9 +97,9 @@ const StudentOptionsModal: React.FC<StudentOptionsModalProps> = ({
               />
               <Input
                 placeholder="Roll Number"
-                value={editedStudent?.idNumber || ""}
+                value={editedStudent?.roll_no || ""}
                 onChangeText={(text) =>
-                  setEditedStudent({ ...editedStudent!, idNumber: text })
+                  setEditedStudent({ ...editedStudent!, roll_no: text })
                 }
               />
               <Input
@@ -137,7 +133,7 @@ const StudentOptionsModal: React.FC<StudentOptionsModalProps> = ({
         <AlertDialog.Content>
           <AlertDialog.Header>Confirm Delete</AlertDialog.Header>
           <AlertDialog.Body padding={4}>
-            Are you sure you want to delete this account? 
+            Are you sure you want to delete this account?
           </AlertDialog.Body>
           <AlertDialog.Footer>
             <Button
@@ -150,7 +146,7 @@ const StudentOptionsModal: React.FC<StudentOptionsModalProps> = ({
             <Button
               colorScheme="red"
               onPress={() => {
-                onDelete(student.id);
+                onDelete(student.email);
                 setConfirmDelete(false);
                 onClose();
               }}

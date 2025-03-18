@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   HStack,
@@ -15,39 +15,61 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AdminAccountCreateModal from "./AdminAccountCreateModal";
 import AdminOptionsModal from "./AdminOptionsModal";
+import { get_admins } from "@/api/admin/get-admin.api";
+
+type Admin = {
+  id: string;
+  name: string;
+  level: string;
+  email: string;
+};
+
 const AdminManagement = () => {
   const [level, setLevel] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [admins, setAdmins] = useState([
-    {
-      id: 1,
-      name: "Daw Win Aye",
-      level: "High Level Admin",
-      email: "winaye@email.com",
-    },
-    {
-      id: 2,
-      name: "U Min Thu",
-      level: "Low Level Admin",
-      email: "minthu@example.com",
-    },
-    // Add more students as needed
-  ]);
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [refresh, setRefresh] = useState(false);
+
+  // Function to manually trigger refresh
+  const triggerRefresh = () => {
+    setRefresh((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await get_admins();
+
+      const formattedAdmins = response.admins.map((admin: any) => ({
+        id: admin._id,
+        name: admin.user.name,
+        email: admin.user.email,
+        level: admin.adminRole === "super" ? "Super Admin" : "Standard Admin",
+      }));
+      setAdmins(formattedAdmins);
+    };
+    fetchData();
+  }, [refresh]);
   const [modalVisible, setModalVisible] = useState(false);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<{
-    id: number;
+    id: string;
     name: string;
     level: string;
     email: string;
   } | null>(null);
 
+  const filteredAdmins = admins.filter(
+    (admin) =>
+      (!level || admin.level === level) &&
+      admin.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const addAdmin = (admin: { name: string; level: string; email: string }) => {
-    setAdmins([...admins, { id: admins.length + 1, ...admin }]);
+    // setAdmins([...admins, { id: admins.length + 1, ...admin }]);
   };
 
   const deleteAdmin = (id: number) => {
-    setAdmins(admins.filter((admin) => admin.id !== id));
+    // setAdmins(admins.filter((admin) => admin.id !== id));
   };
 
   const updateAdmin = (updatedAdmin: {
@@ -56,18 +78,20 @@ const AdminManagement = () => {
     level: string;
     email: string;
   }) => {
-    setAdmins(
-      admins.map((admin) =>
-        admin.id === updatedAdmin.id ? updatedAdmin : admin
-      )
-    );
+    // setAdmins(
+    //   // admins.map((admin) =>
+    //   //   admin.id === updatedAdmin.id ? updatedAdmin : admin
+    //   // )
+    // );
   };
 
-  const filteredStudents = admins.filter(
-    (admin) =>
-      (!level || admin.level?.trim() === level.trim()) && 
-      admin.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredStudents = admins.filter(
+  //   (admin) =>
+  //     (!level || admin.level?.trim() === level.trim()) &&
+  //     admin.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  const filteredStudents: any = [];
 
   return (
     <Box safeArea p="4">
@@ -80,8 +104,8 @@ const AdminManagement = () => {
           onValueChange={(value) => setLevel(value)}
         >
           <Select.Item label="All Levels" value="" />
-          <Select.Item label="High Level Admin" value="High Level Admin" />
-          <Select.Item label="Low Level Admin" value="Low Level Admin" />
+          <Select.Item label="Super Admin" value="Super Admin" />
+          <Select.Item label="Standard Admin" value="Standard Admin" />
         </Select>
 
         <Input
@@ -92,6 +116,7 @@ const AdminManagement = () => {
             <Icon as={Ionicons} name="search-outline" size="sm" ml="2" />
           }
         />
+        <Button onPress={triggerRefresh}>Refresh</Button>
       </HStack>
 
       {/* Admin List */}
@@ -109,9 +134,9 @@ const AdminManagement = () => {
           </Button>
         </HStack>
 
-        <FlatList
-          data={filteredStudents}
-          keyExtractor={(item) => item.id.toString()}
+        <FlatList<Admin>
+          data={filteredAdmins}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <HStack
               justifyContent="space-between"
@@ -136,7 +161,7 @@ const AdminManagement = () => {
                   setSelectedAdmin({
                     id: item.id,
                     name: item.name,
-                    level: item.level || "", // If level is undefined, default to an empty string
+                    level: item.level,
                     email: item.email,
                   });
                   setOptionsModalVisible(true);
@@ -160,7 +185,12 @@ const AdminManagement = () => {
       <AdminOptionsModal
         isOpen={optionsModalVisible}
         onClose={() => setOptionsModalVisible(false)}
-        admin={selectedAdmin}
+        admin={{
+          id: 12,
+          name: "Win Aye",
+          level: "standard",
+          email: "admin1@email.com",
+        }}
         onDelete={deleteAdmin}
         onUpdate={updateAdmin}
       />

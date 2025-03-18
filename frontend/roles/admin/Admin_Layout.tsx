@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { Box, Text } from "native-base";
@@ -6,8 +6,9 @@ import StudentManagement from "./StudentManagement";
 import TeacherManagement from "./TeacherManagement";
 import Event_Planner from "./Event_Planner";
 import AdminManagement from "./AdminManagement";
-import AdminSidebar from "./AdminSidebar"
+import AdminSidebar from "./AdminSidebar";
 import Admin_Header from "./Admin_Header";
+import { get_admin } from "@/api/admin/get-admin.api";
 
 const Drawer = createDrawerNavigator();
 
@@ -25,7 +26,21 @@ const Screen: React.FC = ({ navigation }: any) => {
   );
 };
 
-const Admin_Layout: React.FC = () => {
+interface Admin_Layout_Proprs {
+  token: string;
+}
+
+const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
+  const [adminData, setAdminData] = useState([]);
+  const fetchAdminData = async () => {
+    if (!token) return;
+    const adminData = await get_admin(token);
+    setAdminData(adminData.admin);
+  };
+
+  useEffect(() => {
+    fetchAdminData();
+  }, [token]);
   return (
     <Drawer.Navigator
       drawerContent={(props: DrawerContentComponentProps) => (
@@ -86,7 +101,6 @@ const Admin_Layout: React.FC = () => {
       />
       <Drawer.Screen
         name="Events"
-        component={Event_Planner}
         options={({ navigation }) => ({
           header: () => (
             <Admin_Header
@@ -95,7 +109,10 @@ const Admin_Layout: React.FC = () => {
             />
           ),
         })}
-      />
+      >
+        {(props) => <Event_Planner {...props} token={token} />}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="ToDoList"
         component={Screen}
@@ -132,7 +149,6 @@ const Admin_Layout: React.FC = () => {
           ),
         })}
       />
-       
     </Drawer.Navigator>
   );
 };

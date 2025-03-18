@@ -65,11 +65,16 @@ const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
           ),
         })}
       >
-        {(props) => <Student_Dashboard {...props} token={token} />}
+        {(props) => (
+          <Student_Dashboard
+            {...props}
+            token={token}
+            studentID={studentData._id}
+          />
+        )}
       </Drawer.Screen>
       <Drawer.Screen
         name="Timetable"
-        component={Student_Timetable}
         options={({ navigation }) => ({
           header: () => (
             <StudentHeader
@@ -78,7 +83,15 @@ const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
             />
           ),
         })}
-      />
+      >
+        {(props) => (
+          <Student_Timetable
+            {...props}
+            token={token}
+            studentId={studentData._id}
+          />
+        )}
+      </Drawer.Screen>
       <Drawer.Screen
         name="Chat"
         component={Screen}

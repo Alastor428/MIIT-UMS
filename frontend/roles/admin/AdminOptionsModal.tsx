@@ -36,8 +36,8 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
     name: string;
     level: string;
     email: string;
-  } | null>(admin);  // Initialize with student or null
-  
+  } | null>(admin); // Initialize with student or null
+
   const cancelRef = useRef(null);
 
   useEffect(() => {
@@ -137,7 +137,7 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
         <AlertDialog.Content>
           <AlertDialog.Header>Confirm Delete</AlertDialog.Header>
           <AlertDialog.Body padding={4}>
-            Are you sure you want to delete this account? 
+            Are you sure you want to delete this account?
           </AlertDialog.Body>
           <AlertDialog.Footer>
             <Button

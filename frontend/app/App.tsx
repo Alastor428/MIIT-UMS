@@ -18,8 +18,8 @@ const App = () => {
   return (
     <NativeBaseProvider>
       {/* Conditionally render based on the role */}
-      {role === "admin" ? (
-        <Admin_Layout />
+      {role === "admin" && accessToken ? (
+        <Admin_Layout token={accessToken} />
       ) : role === "teacher" ? (
         <Teacher_Layout />
       ) : role === "student" && accessToken ? (
