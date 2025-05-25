@@ -8,11 +8,11 @@ import {
   Text,
   VStack,
   HStack,
-  Pressable, // Import Pressable from NativeBase
+  Pressable,
 } from "native-base";
+import { Ionicons } from "@expo/vector-icons";
 import { Task } from "./types";
 import AddTaskModal from "./AddTaskModal";
-import { Ionicons } from "@expo/vector-icons";
 import EditTaskModal from "./EditTaskModal";
 
 const Teacher_ToDoList: React.FC = () => {
@@ -24,12 +24,17 @@ const Teacher_ToDoList: React.FC = () => {
   const handleAddTask = (newTask: Task) => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
   };
+
   const handleEditTask = (updatedTask: Task) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
     );
     setSelectedTask(null);
     setEditModalVisible(false);
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
   const openEditModal = (task: Task) => {
@@ -52,9 +57,6 @@ const Teacher_ToDoList: React.FC = () => {
 
   return (
     <Box flex={1} bg="white" p={4} position="relative">
-      {" "}
-      {/* Set position to relative here */}
-      {/* Task List Header */}
       {Object.keys(tasksGroupedByDate).length === 0 ? (
         <Text textAlign="center" mt={4}>
           No tasks available. Press the "+" button to add a task.
@@ -69,19 +71,37 @@ const Teacher_ToDoList: React.FC = () => {
                     Due Date: {dueDate}
                   </Text>
                   <VStack space={4}>
-                    {tasksForDate.map((task, index) => (
-                      <Pressable
-                        key={index}
+                    {tasksForDate.map((task) => (
+                      <Box
+                        key={task.id}
                         p={4}
                         borderWidth={1}
                         borderRadius="md"
                         borderColor="gray.200"
                         bg={task.color || "gray.50"}
-                        onPress={() => openEditModal(task)} // Now Pressable supports onPress
                       >
-                        <Text bold>{task.title}</Text>
-                        <Text>{task.details}</Text>
-                      </Pressable>
+                        <HStack
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Pressable
+                            onPress={() => openEditModal(task)}
+                            flex={1}
+                          >
+                            <VStack>
+                              <Text bold>{task.title}</Text>
+                              <Text>{task.details}</Text>
+                            </VStack>
+                          </Pressable>
+                          <Button
+                            size="sm"
+                            colorScheme="danger"
+                            onPress={() => handleDeleteTask(task.id)}
+                          >
+                            Delete
+                          </Button>
+                        </HStack>
+                      </Box>
                     ))}
                   </VStack>
                 </Box>
@@ -90,27 +110,32 @@ const Teacher_ToDoList: React.FC = () => {
           </VStack>
         </ScrollView>
       )}
+
       {/* Add Task Modal */}
       <AddTaskModal
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}
         onAddTask={handleAddTask}
       />
+
       {/* Edit Task Modal */}
-      <EditTaskModal
-        isVisible={editModalVisible}
-        task={selectedTask!} // Ensure the task is not null
-        onClose={() => setEditModalVisible(false)}
-        onEditTask={handleEditTask}
-      />
-      {/* Add Task Button */}
+      {selectedTask && (
+        <EditTaskModal
+          isVisible={editModalVisible}
+          task={selectedTask}
+          onClose={() => setEditModalVisible(false)}
+          onEditTask={handleEditTask}
+        />
+      )}
+
+      {/* FAB for Adding Tasks */}
       <Fab
         position="absolute"
         size="sm"
         icon={<Icon as={Ionicons} name="add" />}
         onPress={() => setModalVisible(true)}
-        bottom={4} // Adjust position from the bottom if needed
-        right={4} // Adjust position from the right if needed
+        bottom={4}
+        right={4}
       />
     </Box>
   );

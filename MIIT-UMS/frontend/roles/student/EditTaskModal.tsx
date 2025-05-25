@@ -25,7 +25,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 }) => {
   const [taskDetails, setTaskDetails] = useState<Task>({ ...task });
 
-  // Reset task details when task prop changes
   useEffect(() => {
     setTaskDetails({ ...task });
   }, [task]);
@@ -45,7 +44,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             <FormControl>
               <FormControl.Label>Title</FormControl.Label>
               <Input
-                placeholder="Enter task title"
                 value={taskDetails.title}
                 onChangeText={(text) =>
                   setTaskDetails({ ...taskDetails, title: text })
@@ -55,7 +53,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             <FormControl>
               <FormControl.Label>Details</FormControl.Label>
               <Input
-                placeholder="Enter task details"
                 value={taskDetails.details}
                 onChangeText={(text) =>
                   setTaskDetails({ ...taskDetails, details: text })
@@ -66,8 +63,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <FormControl.Label>Color</FormControl.Label>
               <Select
                 selectedValue={taskDetails.color}
+                placeholder="Select color"
                 minWidth="200"
-                placeholder="Select a color"
                 onValueChange={(value) =>
                   setTaskDetails({ ...taskDetails, color: value })
                 }

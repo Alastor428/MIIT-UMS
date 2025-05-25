@@ -46,9 +46,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({
   };
 
   const handleDateChange = (_event: any, date?: Date) => {
-    if (date) {
-      setSelectedDate(date);
-    }
+    if (date) setSelectedDate(date);
     setShowDatePicker(false);
   };
 
