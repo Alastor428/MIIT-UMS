@@ -44,4 +44,8 @@ export class CreateUserDto {
     @IsString()
     shortName: string;
 
+    @IsOptional()
+    @IsString()
+    rank: string;
+
 }

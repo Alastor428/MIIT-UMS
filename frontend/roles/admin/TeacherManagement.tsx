@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   HStack,
@@ -15,28 +15,24 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import TeacherAccountCreateModal from "./TeacherAccountCreateModal";
 import TeacherOptionsModal from "./TeacherOptionsModal";
+import { get_teacher, get_all_teacher } from "@/api/teacher/get-teacher.api";
+import { delete_teacher } from "@/api/teacher/delete-teacher.api";
+
+export type Teacher = {
+  id: string;
+  name: string;
+  email: string;
+  department: string;
+  rank: string;
+  isHOD: boolean;
+  shortName: string;
+};
 
 const TeacherManagement = () => {
   const [faculty, setFaculty] = useState<string>(""); // Faculty state
   const [level, setLevel] = useState<string>(""); // Level state
   const [searchTerm, setSearchTerm] = useState<string>(""); // Search term state
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "Dr.Zar Chi Su Su Hlaing",
-      level: "Professor",
-      faculty: "MATH",
-      email: "zarchi@example.com",
-    },
-    {
-      id: 2,
-      name: "Dr. Aung Ko Ko",
-      level: "Lecturer",
-      faculty: "SCIENCE",
-      email: "aungkoko@example.com",
-    },
-    // Add more sample teachers here as needed
-  ]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [modalVisible, setModalVisible] = useState(false); // Modal visibility for adding teacher
   const [optionsModalVisible, setOptionsModalVisible] = useState(false); // Modal visibility for teacher options
   const [selectedTeacher, setSelectedTeacher] = useState<{
@@ -48,51 +44,68 @@ const TeacherManagement = () => {
   } | null>(null);
 
   // Add teacher function
-  const addTeacher = (teacher: {
-    name: string;
-    level: string;
-    email: string;
-    faculty: string;
-  }) => {
-    setTeachers([
-      ...teachers,
-      {
-        id: teachers.length + 1,
-        name: teacher.name,
-        level: teacher.level,
-        email: teacher.email,
-        faculty: faculty,
-      },
-    ]);
-  };
+  // const addTeacher = (teacher: {
+  //   name: string;
+  //   level: string;
+  //   email: string;
+  //   faculty: string;
+  // }) => {
+  //   setTeachers([
+  //     ...teachers,
+  //     {
+  //       id: teachers.length + 1,
+  //       name: teacher.name,
+  //       level: teacher.level,
+  //       email: teacher.email,
+  //       faculty: faculty,
+  //     },
+  //   ]);
+  // };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await get_all_teacher();
+      const formattedTeachers = response.teachers.map((teacher: any) => ({
+        id: teacher._id,
+        name: teacher.user.name,
+        department: teacher.department,
+        email: teacher.user.email,
+        isHOD: teacher.isHOD,
+        shortName: teacher.shortName,
+        rank: teacher.rank,
+      }));
+      setTeachers(formattedTeachers);
+    };
+    fetchData();
+  }, []);
 
   // Delete teacher function
-  const deleteTeacher = (id: number) => {
-    setTeachers(teachers.filter((teacher) => teacher.id !== id));
-  };
+  // const deleteTeacher = (id: number) => {
+  //   setTeachers(teachers.filter((teacher) => teacher.id !== id));
+  // };
 
   // Update teacher function
-  const updateTeacher = (updatedTeacher: {
-    id: number;
-    name: string;
-    level: string;
-    email: string;
-    faculty: string;
-  }) => {
-    setTeachers(
-      teachers.map((teacher) =>
-        teacher.id === updatedTeacher.id
-          ? { ...teacher, ...updatedTeacher }
-          : teacher
-      )
-    );
-  };
+  // const updateTeacher = (updatedTeacher: {
+  //   id: number;
+  //   name: string;
+  //   level: string;
+  //   email: string;
+  //   faculty: string;
+  // }) => {
+  //   setTeachers(
+  //     teachers.map((teacher) =>
+  //       teacher.id === updatedTeacher.id
+  //         ? { ...teacher, ...updatedTeacher }
+  //         : teacher
+  //     )
+  //   );
+  // };
 
   // Filter teachers by search term, faculty, and level
   const filteredTeachers = teachers.filter(
     (teacher) =>
-      (!faculty || teacher.faculty === faculty) &&
-      (!level || teacher.level === level) &&
+      (!faculty || teacher.department === faculty) &&
+      (!level || teacher.rank === level) &&
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -172,13 +185,13 @@ const TeacherManagement = () => {
                 <VStack ml="3">
                   <Text fontWeight="bold">{item.name}</Text>
                   <Text fontSize="xs" color="gray.500">
-                    {item.faculty} - {item.level}
+                    {item.department} - {item.rank}
                   </Text>
                 </VStack>
               </HStack>
               <Pressable
                 onPress={() => {
-                  setSelectedTeacher(item);
+                  // setSelectedTeacher(item);
                   setOptionsModalVisible(true);
                 }}
               >
@@ -193,13 +206,10 @@ const TeacherManagement = () => {
       <TeacherAccountCreateModal
         isOpen={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreate={(teacher) => {
-          addTeacher({ ...teacher, faculty });
-        }}
       />
 
       {/* Teacher Options Modal */}
-      <TeacherOptionsModal
+      {/* <TeacherOptionsModal
         isOpen={optionsModalVisible}
         onClose={() => setOptionsModalVisible(false)}
         teacher={selectedTeacher}
@@ -207,7 +217,7 @@ const TeacherManagement = () => {
         onUpdate={(updatedTeacher) => {
           updateTeacher({ ...updatedTeacher, faculty });
         }}
-      />
+      /> */}
     </Box>
   );
 };

@@ -42,7 +42,7 @@ export class GetAllTeachers {
   //   }
   // }
   async getAllTeachers() {
-    const teachers = await this.teacherModal.find().select('shortName isHOD department').populate({
+    const teachers = await this.teacherModal.find().select('shortName isHOD department rank').populate({
       path: 'user',
       select: 'name email'
     }).exec();

@@ -9,6 +9,7 @@ import AdminManagement from "./AdminManagement";
 import AdminSidebar from "./AdminSidebar";
 import Admin_Header from "./Admin_Header";
 import { get_admin } from "@/api/admin/get-admin.api";
+import TimeTableManagement from "./TimeTableManagement";
 
 const Drawer = createDrawerNavigator();
 
@@ -88,17 +89,18 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
         })}
       />
       <Drawer.Screen
-        name="Chat"
-        component={Screen}
+        name="TimeTable"
+        component={TimeTableManagement}
         options={({ navigation }) => ({
           header: () => (
             <Admin_Header
               onSidebarToggle={() => navigation.openDrawer()}
-              title="Chat"
+              title="Time Table"
             />
           ),
         })}
       />
+
       <Drawer.Screen
         name="Events"
         options={({ navigation }) => ({

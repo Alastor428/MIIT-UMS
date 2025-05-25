@@ -3,7 +3,7 @@ export type DrawerParamList = {
   Admin: undefined;
   Teacher: undefined;
   Student: undefined;
-  Chat: undefined;
+  TimeTable: undefined
   Events: undefined;
   ToDoList: undefined;
   About: undefined;

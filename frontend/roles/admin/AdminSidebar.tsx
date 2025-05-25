@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Avatar, Text, VStack, Pressable,Button } from "native-base";
+import { Box, Avatar, Text, VStack, Pressable, Button } from "native-base";
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { DrawerParamList } from "./navigationTypes";
 interface SidebarProps {
@@ -7,7 +7,6 @@ interface SidebarProps {
 }
 
 const Admin_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
-  
   return (
     <Box flex={1} bg="white" p={4}>
       {/* Profile Section */}
@@ -36,8 +35,8 @@ const Admin_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
         <Pressable onPress={() => navigation.navigate("Student")}>
           <Text fontSize="md">Student</Text>
         </Pressable>
-        <Pressable onPress={() => navigation.navigate("Chat")}>
-          <Text fontSize="md">Chat</Text>
+        <Pressable onPress={() => navigation.navigate("TimeTable")}>
+          <Text fontSize="md">TimeTable</Text>
         </Pressable>
         <Pressable onPress={() => navigation.navigate("Events")}>
           <Text fontSize="md">Events</Text>
@@ -52,7 +51,6 @@ const Admin_Sidebar: React.FC<SidebarProps> = ({ navigation }) => {
           <Text fontSize="md">Chatbot</Text>
         </Pressable>
       </VStack>
-      
     </Box>
   );
 };

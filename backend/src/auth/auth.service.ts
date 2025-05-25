@@ -36,7 +36,7 @@ export class AuthService {
 
 
   async register(createUserDto: CreateUserDto): Promise<any> {
-    const { name, email, password, role, batch, department, isHOD, gender, adminRole, shortName, roll_no } = createUserDto;
+    const { name, email, password, role, batch, department, isHOD, gender, adminRole, shortName, roll_no, rank } = createUserDto;
 
 
     if (!email) {
@@ -76,6 +76,7 @@ export class AuthService {
         throw new BadRequestException('Department is required for teachers');
       }
       const teacherData: CreateTeacherDto = {
+        rank,
         shortName,
         department,
         isHOD: isHOD || false,

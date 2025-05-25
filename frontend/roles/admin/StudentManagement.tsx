@@ -189,7 +189,6 @@ const StudentManagement = () => {
       <StudentAccountCreateModal
         isOpen={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreate={addStudent}
       />
 
       {/* Student Options Modal */}

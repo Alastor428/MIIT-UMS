@@ -8,6 +8,9 @@ import { TeacherEventDto } from '../dto/teacher-event.dto';
   timestamps: true,
 })
 export class Teacher extends Document {
+  @Prop({ required: true })
+  rank: string
+
   @Prop({ required: true, unique: true })
   shortName: string
 
