@@ -14,7 +14,7 @@ import {
   Column,
 } from "native-base";
 import { useState } from "react";
-import uploadTimetable from "@/api/batch-timetable/upload-timetable.api";
+import { uploadTimetable } from "@/api/batch-timetable/upload-timetable.api";
 import { Course, CourseDetail, FetchedTimeSlot } from "../student/types";
 import { get_batch_timetable } from "@/api/batch-timetable/get-timetable.api";
 
@@ -127,20 +127,22 @@ export default function TimeTableManagement() {
   };
 
   const handleUpload = async () => {
-    if (!fileUri || !fileName) {
+    if (!fileUri || !fileName || !mimeType) {
       Alert.alert("No File", "Please select a CSV file before uploading.");
       return;
     }
 
     try {
       const formData = new FormData();
+
       formData.append("file", {
         uri: fileUri,
         name: fileName,
-        type: mimeType || "text/csv",
-      } as any);
+        type: mimeType,
+      } as any); // "as any" is needed for React Native FormData
 
       const response = await uploadTimetable(formData, "admin");
+
       console.log("Upload response:", response);
       Alert.alert("Success", "Timetable uploaded successfully.");
     } catch (error) {

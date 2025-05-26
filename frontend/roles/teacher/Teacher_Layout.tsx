@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { Box, Text } from "native-base";
@@ -8,7 +8,10 @@ import TeacherHeader from "./TeacherHeader";
 import Teacher_Timetable from "./Teacher_Timetable";
 import Teacher_ToDoList from "./Teacher_ToDoList";
 import Teacher_Event from "./Teacher_Event";
-import Login from "../student/Login";
+import { get_teacher } from "@/api/teacher/get-teacher.api";
+import ChatBot from "../student/Chatbot"; // assuming same Chatbot
+// import Login from "../student/Login"; // keep commented if unused
+
 const Drawer = createDrawerNavigator();
 
 const Screen: React.FC = ({ navigation }: any) => {
@@ -25,11 +28,32 @@ const Screen: React.FC = ({ navigation }: any) => {
   );
 };
 
-const Teacher_Layout: React.FC = () => {
+interface TeacherLayoutProps {
+  token: string;
+  onLogout: () => void;
+}
+
+const Teacher_Layout: React.FC<TeacherLayoutProps> = ({ token, onLogout }) => {
+  const [teacherData, setTeacherData] = useState<Record<string, any>>({});
+
+  const fetchTeacherData = async () => {
+    if (!token) return;
+    const teacherRes = await get_teacher(token);
+    setTeacherData(teacherRes.teacher);
+  };
+
+  useEffect(() => {
+    fetchTeacherData();
+  }, [token]);
+
   return (
     <Drawer.Navigator
       drawerContent={(props: DrawerContentComponentProps) => (
-        <Teacher_Sidebar navigation={props.navigation as any} />
+        <Teacher_Sidebar
+          navigation={props.navigation as any}
+          teacherData={teacherData}
+          onLogout={onLogout}
+        />
       )}
       screenOptions={{
         drawerStyle: { width: 300 },
@@ -38,7 +62,6 @@ const Teacher_Layout: React.FC = () => {
     >
       <Drawer.Screen
         name="Dashboard"
-        component={Teacher_Dashboard}
         options={({ navigation }) => ({
           header: () => (
             <TeacherHeader
@@ -47,10 +70,18 @@ const Teacher_Layout: React.FC = () => {
             />
           ),
         })}
-      />
+      >
+        {(props) => (
+          <Teacher_Dashboard
+            {...props}
+            token={token}
+            teacherId={teacherData._id}
+          />
+        )}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="Timetable"
-        component={Teacher_Timetable}
         options={({ navigation }) => ({
           header: () => (
             <TeacherHeader
@@ -59,7 +90,16 @@ const Teacher_Layout: React.FC = () => {
             />
           ),
         })}
-      />
+      >
+        {(props) => (
+          <Teacher_Timetable
+            {...props}
+            token={token}
+            teacherId={teacherData._id}
+          />
+        )}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="Chat"
         component={Screen}
@@ -72,6 +112,7 @@ const Teacher_Layout: React.FC = () => {
           ),
         })}
       />
+
       <Drawer.Screen
         name="Events"
         component={Teacher_Event}
@@ -84,6 +125,7 @@ const Teacher_Layout: React.FC = () => {
           ),
         })}
       />
+
       <Drawer.Screen
         name="ToDoList"
         component={Teacher_ToDoList}
@@ -96,7 +138,8 @@ const Teacher_Layout: React.FC = () => {
           ),
         })}
       />
-      <Drawer.Screen
+
+      {/* <Drawer.Screen
         name="About"
         component={Screen}
         options={({ navigation }) => ({
@@ -107,10 +150,11 @@ const Teacher_Layout: React.FC = () => {
             />
           ),
         })}
-      />
+      /> */}
+
       <Drawer.Screen
         name="Chatbot"
-        component={Screen}
+        component={ChatBot}
         options={({ navigation }) => ({
           header: () => (
             <TeacherHeader
@@ -120,11 +164,6 @@ const Teacher_Layout: React.FC = () => {
           ),
         })}
       />
-      {/* <Drawer.Screen
-        name="Login" // Ensure you have a login screen here
-        component={Login}
-        options={{ headerShown: false }}
-      /> */}
     </Drawer.Navigator>
   );
 };

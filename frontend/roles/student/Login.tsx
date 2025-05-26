@@ -146,6 +146,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <Button onPress={handleLogin} mt={4} size="lg">
           Login
         </Button>
+
+        <Button
+          variant="outline"
+          colorScheme="coolGray"
+          onPress={() => onLogin("guest", "")}
+          mt={2}
+          size="lg"
+        >
+          View as Guest
+        </Button>
       </VStack>
     </Box>
   );

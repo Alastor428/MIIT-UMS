@@ -52,7 +52,6 @@ const Student_ToDoList: React.FC = () => {
 
   return (
     <Box flex={1} bg="white" p={4} position="relative">
-      {" "}
       {/* Set position to relative here */}
       {/* Task List Header */}
       {Object.keys(tasksGroupedByDate).length === 0 ? (

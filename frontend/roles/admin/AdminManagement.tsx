@@ -16,15 +16,20 @@ import { Ionicons } from "@expo/vector-icons";
 import AdminAccountCreateModal from "./AdminAccountCreateModal";
 import AdminOptionsModal from "./AdminOptionsModal";
 import { get_admins } from "@/api/admin/get-admin.api";
+import { delete_admin } from "@/api/admin/delete-admin.api";
 
-type Admin = {
-  id: string;
+export type Admin = {
+  _id: string;
   name: string;
-  level: string;
+  adminRole: string;
   email: string;
 };
 
-const AdminManagement = () => {
+interface AdminManagementProps {
+  token: string;
+}
+
+const AdminManagement: React.FC<AdminManagementProps> = ({ token }) => {
   const [level, setLevel] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -38,13 +43,14 @@ const AdminManagement = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await get_admins();
-
+      console.log(response);
       const formattedAdmins = response.admins.map((admin: any) => ({
-        id: admin._id,
+        _id: admin._id,
         name: admin.user.name,
         email: admin.user.email,
-        level: admin.adminRole === "super" ? "Super Admin" : "Standard Admin",
+        adminRole: admin.adminRole,
       }));
+
       setAdmins(formattedAdmins);
     };
     fetchData();
@@ -54,22 +60,25 @@ const AdminManagement = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<{
     id: string;
     name: string;
-    level: string;
+    adminRole: string;
     email: string;
   } | null>(null);
+  console.log(selectedAdmin);
 
   const filteredAdmins = admins.filter(
     (admin) =>
-      (!level || admin.level === level) &&
+      (!level || admin.adminRole === level) &&
       admin.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const addAdmin = (admin: { name: string; level: string; email: string }) => {
-    // setAdmins([...admins, { id: admins.length + 1, ...admin }]);
-  };
-
-  const deleteAdmin = (id: number) => {
-    // setAdmins(admins.filter((admin) => admin.id !== id));
+  const deleteAdmin = async (id: string) => {
+    try {
+      console.log(id);
+      const response = await delete_admin(id);
+      console.log(response);
+    } catch (e) {
+      console.log("Error Deleting an Admin: ", e);
+    }
   };
 
   const updateAdmin = (updatedAdmin: {
@@ -136,7 +145,7 @@ const AdminManagement = () => {
 
         <FlatList<Admin>
           data={filteredAdmins}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <HStack
               justifyContent="space-between"
@@ -152,16 +161,16 @@ const AdminManagement = () => {
                 <VStack ml="3">
                   <Text fontWeight="bold">{item.name}</Text>
                   <Text fontSize="xs" color="gray.500">
-                    {item.level}
+                    {item.adminRole}
                   </Text>
                 </VStack>
               </HStack>
               <Pressable
                 onPress={() => {
                   setSelectedAdmin({
-                    id: item.id,
+                    id: item._id,
                     name: item.name,
-                    level: item.level,
+                    adminRole: item.adminRole,
                     email: item.email,
                   });
                   setOptionsModalVisible(true);
@@ -178,19 +187,12 @@ const AdminManagement = () => {
       <AdminAccountCreateModal
         isOpen={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreate={addAdmin}
       />
 
-      {/* Student Options Modal */}
       <AdminOptionsModal
         isOpen={optionsModalVisible}
         onClose={() => setOptionsModalVisible(false)}
-        admin={{
-          id: 12,
-          name: "Win Aye",
-          level: "standard",
-          email: "admin1@email.com",
-        }}
+        admin={selectedAdmin}
         onDelete={deleteAdmin}
         onUpdate={updateAdmin}
       />

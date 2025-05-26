@@ -8,12 +8,14 @@ import {
   HStack,
   AlertDialog,
 } from "native-base";
+import { Admin } from "./AdminManagement";
+import { delete_admin } from "@/api/admin/delete-admin.api";
 
 interface AdminOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  admin: { id: number; name: string; level: string; email: string } | null;
-  onDelete: (id: number) => void;
+  admin: { id: string; name: string; adminRole: string; email: string } | null;
+  onDelete: (id: string) => void;
   onUpdate: (updatedAdmin: {
     id: number;
     name: string;
@@ -32,9 +34,9 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [editedAdmin, setEditedAdmin] = useState<{
-    id: number;
+    id: string;
     name: string;
-    level: string;
+    adminRole: string;
     email: string;
   } | null>(admin); // Initialize with student or null
 
@@ -48,10 +50,20 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
 
   if (!admin) return null;
 
+  const deleteAdmin = async (id: string) => {
+    console.log(id);
+    try {
+      const response = await delete_admin(id);
+      console.log(response);
+    } catch (e) {
+      console.log("Error Deleting an Admin: ", e);
+    }
+  };
+
   const handleSaveChanges = () => {
-    if (editedAdmin && onUpdate) {
+    if (editedAdmin) {
       console.log("Calling onUpdate with", editedAdmin); // Log for debugging
-      onUpdate(editedAdmin);
+      // onUpdate(editedAdmin);
       setEditModal(false);
     } else {
       console.error("onUpdate is undefined or editedAdmin is null");
@@ -68,7 +80,7 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
           <Modal.Body>
             <VStack space={4}>
               <Text fontWeight="bold">Name: {admin.name}</Text>
-              <Text>Level: {admin.level}</Text>
+              <Text>Level: {admin.adminRole}</Text>
               <Text>Email: {admin.email}</Text>
             </VStack>
           </Modal.Body>
@@ -101,9 +113,9 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
               />
               <Input
                 placeholder="Level"
-                value={editedAdmin?.level || ""}
+                value={editedAdmin?.adminRole || ""}
                 onChangeText={(text) =>
-                  setEditedAdmin({ ...editedAdmin!, level: text })
+                  setEditedAdmin({ ...editedAdmin!, adminRole: text })
                 }
               />
               <Input
@@ -150,7 +162,7 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
             <Button
               colorScheme="red"
               onPress={() => {
-                onDelete(admin.id);
+                deleteAdmin(admin.id);
                 setConfirmDelete(false);
                 onClose();
               }}

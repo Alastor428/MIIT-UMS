@@ -10,6 +10,7 @@ import AdminSidebar from "./AdminSidebar";
 import Admin_Header from "./Admin_Header";
 import { get_admin } from "@/api/admin/get-admin.api";
 import TimeTableManagement from "./TimeTableManagement";
+import ChatBot from "../student/Chatbot";
 
 const Drawer = createDrawerNavigator();
 
@@ -29,9 +30,10 @@ const Screen: React.FC = ({ navigation }: any) => {
 
 interface Admin_Layout_Proprs {
   token: string;
+  onLogout: () => void;
 }
 
-const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
+const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token, onLogout }) => {
   const [adminData, setAdminData] = useState([]);
   const fetchAdminData = async () => {
     if (!token) return;
@@ -45,7 +47,11 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
   return (
     <Drawer.Navigator
       drawerContent={(props: DrawerContentComponentProps) => (
-        <AdminSidebar navigation={props.navigation as any} />
+        <AdminSidebar
+          navigation={props.navigation as any}
+          adminData={adminData}
+          onLogout={onLogout}
+        />
       )}
       screenOptions={{
         drawerStyle: { width: 300 },
@@ -54,7 +60,6 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
     >
       <Drawer.Screen
         name="Admin"
-        component={AdminManagement}
         options={({ navigation }) => ({
           header: () => (
             <Admin_Header
@@ -63,7 +68,9 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
             />
           ),
         })}
-      />
+      >
+        {(props) => <AdminManagement {...props} token={token} />}
+      </Drawer.Screen>
       <Drawer.Screen
         name="Teacher"
         component={TeacherManagement}
@@ -115,7 +122,7 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
         {(props) => <Event_Planner {...props} token={token} />}
       </Drawer.Screen>
 
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="ToDoList"
         component={Screen}
         options={({ navigation }) => ({
@@ -126,7 +133,7 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
             />
           ),
         })}
-      />
+      /> */}
       <Drawer.Screen
         name="About"
         component={Screen}
@@ -141,7 +148,7 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token }) => {
       />
       <Drawer.Screen
         name="Chatbot"
-        component={Screen}
+        component={ChatBot}
         options={({ navigation }) => ({
           header: () => (
             <Admin_Header

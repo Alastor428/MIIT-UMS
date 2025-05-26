@@ -5,11 +5,13 @@ import { DrawerParamList } from "./navigationTypes";
 interface SidebarProps {
   navigation: DrawerNavigationProp<DrawerParamList>;
   studentData: Record<string, any>;
+  onLogout: () => void;
 }
 
 const Student_Sidebar: React.FC<SidebarProps> = ({
   navigation,
   studentData,
+  onLogout,
 }) => {
   const [name, setName] = useState(studentData.user?.name || "Loading...");
   useEffect(() => {
@@ -18,46 +20,63 @@ const Student_Sidebar: React.FC<SidebarProps> = ({
     }
   }, [studentData.user?.name]);
   return (
-    <Box flex={1} bg="white" p={4}>
-      {/* Profile Section */}
-      <Box alignItems="flex-start" mb={6}>
-        <Avatar
-          size="xl"
-          source={{
-            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxFv3zhivTb0-F68WalciqjfH-ozebDhMKiQ&s", // Replace with actual profile pic URL
-          }}
-        />
-        <Text fontSize="lg" fontWeight="bold" mt={3}>
-          {name}
-        </Text>
-        <Text fontSize="md" color="gray.500">
-          {studentData.roll_no}
-        </Text>
+    <Box flex={1} bg="white" p={4} justifyContent={"space-between"}>
+      <Box>
+        {/* Profile Section */}
+        <Box alignItems="flex-start" mb={6}>
+          <Avatar
+            size="xl"
+            source={{
+              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxFv3zhivTb0-F68WalciqjfH-ozebDhMKiQ&s", // Replace with actual profile pic URL
+            }}
+          />
+          <Text fontSize="lg" fontWeight="bold" mt={3}>
+            {name}
+          </Text>
+          <Text fontSize="md" color="gray.500">
+            {studentData.roll_no}
+          </Text>
+        </Box>
+
+        <VStack space={4}>
+          <Pressable onPress={() => navigation.navigate("Dashboard")}>
+            <Text fontSize="md">Dashboard</Text>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate("Timetable")}>
+            <Text fontSize="md">Timetable</Text>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate("Chat")}>
+            <Text fontSize="md">Chat</Text>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate("Events")}>
+            <Text fontSize="md">Events</Text>
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate("ToDoList")}>
+            <Text fontSize="md">To-Do List</Text>
+          </Pressable>
+          {/* <Pressable onPress={() => navigation.navigate("About")}>
+            <Text fontSize="md">About</Text>
+          </Pressable> */}
+          <Pressable onPress={() => navigation.navigate("Chatbot")}>
+            <Text fontSize="md">Chatbot</Text>
+          </Pressable>
+        </VStack>
       </Box>
 
-      <VStack space={4}>
-        <Pressable onPress={() => navigation.navigate("Dashboard")}>
-          <Text fontSize="md">Dashboard</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("Timetable")}>
-          <Text fontSize="md">Timetable</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("Chat")}>
-          <Text fontSize="md">Chat</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("Events")}>
-          <Text fontSize="md">Events</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("ToDoList")}>
-          <Text fontSize="md">To-Do List</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("About")}>
-          <Text fontSize="md">About</Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("Chatbot")}>
-          <Text fontSize="md">Chatbot</Text>
-        </Pressable>
-      </VStack>
+      {/* Logout Button */}
+      <Pressable onPress={onLogout} mt={6}>
+        <Box
+          bg="red.100"
+          p={3}
+          borderRadius="md"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text fontSize="md" color="red.600" fontWeight="bold">
+            Log Out
+          </Text>
+        </Box>
+      </Pressable>
     </Box>
   );
 };

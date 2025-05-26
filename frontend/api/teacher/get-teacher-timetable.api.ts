@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const get_student_timetable = async (token: string) => {
+export const get_teacher_timetable = async (token: string) => {
     try {
         const response = await axios.get(`http://192.168.137.1:3000/api/teacher/timetable`, {
             headers: {

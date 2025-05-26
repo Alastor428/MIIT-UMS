@@ -9,6 +9,7 @@ import Student_Timetable from "./Student_Timetable";
 import Student_ToDoList from "./Student_ToDoList";
 import Student_Event from "./Student_Event";
 import { get_student } from "@/api/student/get-student.api";
+import ChatBot from "./Chatbot";
 
 const Drawer = createDrawerNavigator();
 
@@ -28,9 +29,13 @@ const Screen: React.FC = ({ navigation }: any) => {
 
 interface Student_Layout_Props {
   token: string;
+  onLogout: () => void;
 }
 
-const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
+const Student_Layout: React.FC<Student_Layout_Props> = ({
+  token,
+  onLogout,
+}) => {
   const [studentData, setStudentData] = useState<Record<string, any>>({});
   const fetchStudentData = async () => {
     if (!token) return;
@@ -47,6 +52,7 @@ const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
         <Student_Sidebar
           navigation={props.navigation as any}
           studentData={studentData}
+          onLogout={onLogout}
         />
       )}
       screenOptions={{
@@ -128,7 +134,7 @@ const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
           ),
         })}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="About"
         component={Screen}
         options={({ navigation }) => ({
@@ -139,10 +145,10 @@ const Student_Layout: React.FC<Student_Layout_Props> = ({ token }) => {
             />
           ),
         })}
-      />
+      /> */}
       <Drawer.Screen
         name="Chatbot"
-        component={Screen}
+        component={ChatBot}
         options={({ navigation }) => ({
           header: () => (
             <StudentHeader

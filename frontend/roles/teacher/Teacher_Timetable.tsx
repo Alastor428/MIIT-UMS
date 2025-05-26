@@ -1,8 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Text, Button, VStack, HStack, Pressable } from "native-base";
 import AddCourseModal from "./AddCourseModal";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import OptionsModal from "./OpnionsModal";
+import { FetchedTimeSlot } from "./types";
+import { get_teacher } from "@/api/teacher/get-teacher.api";
+import { get_teacher_timetable } from "@/api/teacher/get-teacher-timetable.api";
+
+type FetchedTimetable = FetchedTimeSlot[];
+
+const dayMapping: { [key: string]: string } = {
+  Mon: "Monday",
+  Tue: "Tuesday",
+  Wed: "Wednesday",
+  Thu: "Thursday",
+  Fri: "Friday",
+};
+
+interface TeacherTimeTableProps {
+  token: string;
+  teacherId: string;
+}
 
 export interface Course {
   name: string;
@@ -15,256 +33,63 @@ export interface Course {
   faculty: string;
 }
 
-const Teacher_Timetable = () => {
+const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
+  token,
+  teacherId,
+}) => {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+  const transformedTimetableData = (timetable: FetchedTimetable): Course[] => {
+    const courses: Course[] = [];
+
+    timetable.forEach((timeSlot) => {
+      const time = timeSlot.time;
+      days.forEach((day) => {
+        const abbreviatedDay = dayMapping[day];
+        const courseData = timeSlot[abbreviatedDay as keyof FetchedTimeSlot];
+        if (
+          courseData &&
+          typeof courseData === "object" &&
+          !Array.isArray(courseData)
+        ) {
+          courses.push({
+            name: courseData.courseName,
+            time: time,
+            day: day,
+            room: courseData.room,
+            code: courseData.courseCode,
+            instructor: courseData.instructor,
+            credit: courseData.credit.toString(),
+            faculty: courseData.faculty,
+          });
+        }
+      });
+    });
+
+    return courses;
+  };
+
+  const refreshTimetable = async () => {
+    const data = await get_teacher_timetable(token);
+    setCourses(transformedTimetableData(data.timetable));
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await get_teacher_timetable(token);
+      const transformedCourses = transformedTimetableData(data.timetable);
+      setCourses(transformedCourses);
+    };
+    fetchData();
+  }, [token]);
   const [selectedView, setSelectedView] = useState<"week" | "day">("week");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(2);
   const [newCourse, setNewCourse] = useState<Course | null>(null);
 
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      name: "CSE 3030",
-      time: "10-10:50",
-      day: "Monday",
-      room: "201",
-      code: "CSE 3030",
-      instructor: "Dr. Smith",
-      credit: "3",
-      faculty: "Science",
-    },
-    {
-      name: "MATH 3020",
-      time: "11-11:50",
-      day: "Monday",
-      room: "211",
-      code: "MATH 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "1-1:50",
-      day: "Monday",
-      room: "211",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "HSS C013",
-      time: "2-2:50",
-      day: "Monday",
-      room: "211",
-      code: "HSS C013",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3041",
-      time: "3-3:50",
-      day: "Monday",
-      room: "211",
-      code: "CSE 3041",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3041",
-      time: "4-4:50",
-      day: "Monday",
-      room: "211",
-      code: "CSE 3041",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3040",
-      time: "9-9:50",
-      day: "Tuesday",
-      room: "211",
-      code: "CSE 3040",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "10-10:50",
-      day: "Tuesday",
-      room: "211",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3050",
-      time: "11-11:50",
-      day: "Tuesday",
-      room: "211",
-      code: "CSE 3050",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "MATH 3020",
-      time: "2-2:50",
-      day: "Tuesday",
-      room: "211",
-      code: "MATH 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "LANG 3020",
-      time: "9-9:50",
-      day: "Wednesday",
-      room: "211",
-      code: "LANG 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3040",
-      time: "11-11:50",
-      day: "Wednesday",
-      room: "211",
-      code: "CSE 3040",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3030",
-      time: "1-1:50",
-      day: "Wednesday",
-      room: "211",
-      code: "CSE 3030",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3050",
-      time: "2-2:50",
-      day: "Wednesday",
-      room: "211",
-      code: "CSE 3040",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3030",
-      time: "9-9:50",
-      day: "Thursday",
-      room: "211",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "MATH 3020",
-      time: "10-10:50",
-      day: "Thursday",
-      room: "211",
-      code: "MATH 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3050",
-      time: "11-11:50",
-      day: "Thursday",
-      room: "211",
-      code: "CSE 3050",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3040",
-      time: "1-1:50",
-      day: "Thursday",
-      room: "211",
-      code: "CSE 3040",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "2-3:50",
-      day: "Thursday",
-      room: "211",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "LANG 3020",
-      time: "3-3:50",
-      day: "Thursday",
-      room: "211",
-      code: "LANG 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3030",
-      time: "10-10:50",
-      day: "Friday",
-      room: "211",
-      code: "CSE 3030",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3050",
-      time: "11-11:50",
-      day: "Friday",
-      room: "211",
-      code: "CSE 3050",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "CSE 3060",
-      time: "1-1:50",
-      day: "Friday",
-      room: "211",
-      code: "CSE 3060",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-    {
-      name: "MATH 3020",
-      time: "3-3:50",
-      day: "Friday",
-      room: "211",
-      code: "MATH 3020",
-      instructor: "Prof. Jack",
-      credit: "4",
-      faculty: "Engineering",
-    },
-  ]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  console.log(courses);
 
   const handleCourseClick = (
     course: Course | null,
@@ -361,45 +186,44 @@ const Teacher_Timetable = () => {
                 ))}
               </HStack>
               {[
-                "9-9:50",
-                "10-10:50",
-                "11-11:50",
-                "1-1:50",
-                "2-2:50",
-                "3-3:50",
-                "4-4:50",
+                "9:00-9:50",
+                "10:00-10:50",
+                "11:00-11:50",
+                "1:00-1:50",
+                "2:00-2:50",
+                "3:00-3:50",
+                "4:00-4:50",
               ].map((timeSlot) => (
                 <HStack key={timeSlot} py={1} mb={1}>
                   <Text width="16%" textAlign="center" fontSize="sm">
                     {timeSlot}
                   </Text>
-                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(
-                    (day) => {
-                      const course = courses.find(
-                        (c) => c.day === day && c.time === timeSlot
-                      );
-                      return (
-                        <Pressable
-                          key={day}
-                          onPress={() =>
-                            handleCourseClick(course || null, timeSlot, day)
-                          }
-                          bg={course ? "primary.200" : "gray.100"}
-                          p={1}
-                          rounded="md"
-                          height="60px"
-                          width="16%"
-                          justifyContent="center"
-                          alignItems="center"
-                          mx={0.5}
-                        >
-                          <Text fontSize="xs" textAlign="center">
-                            {course ? course.name : "Add"}
-                          </Text>
-                        </Pressable>
-                      );
-                    }
-                  )}
+                  {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => {
+                    const course = courses.find(
+                      (c) => c.day === day && c.time === timeSlot
+                    );
+
+                    return (
+                      <Pressable
+                        key={day}
+                        onPress={() =>
+                          handleCourseClick(course || null, timeSlot, day)
+                        }
+                        bg={course ? "primary.200" : "gray.100"}
+                        p={1}
+                        rounded="md"
+                        height="60px"
+                        width="16%"
+                        justifyContent="center"
+                        alignItems="center"
+                        mx={0.5}
+                      >
+                        <Text fontSize="xs" textAlign="center">
+                          {course ? course.name : "Add"}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
                 </HStack>
               ))}
             </VStack>

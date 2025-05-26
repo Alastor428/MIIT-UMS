@@ -1,19 +1,71 @@
 import React, { useState } from "react";
-import { Modal, Button, FormControl, Input, VStack } from "native-base";
+import {
+  Modal,
+  Button,
+  FormControl,
+  Input,
+  VStack,
+  useToast,
+  Spinner,
+} from "native-base";
+import { create_admin } from "@/api/admin/create-admin.api"; // ✅ Make sure this is a default export
 
 interface AdminAccountCreateProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (admin: { name: string; level: string; email: string }) => void;
 }
 
-const AdminAccountCreateModal: React.FC<AdminAccountCreateProps> = ({ isOpen, onClose, onCreate }) => {
-  const [admin, setAdmin] = useState({ name: "", level: "", email: "" });
+const AdminAccountCreateModal: React.FC<AdminAccountCreateProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const toast = useToast();
 
-  const handleCreate = () => {
-    onCreate(admin);  // Pass the new student data back to the parent
-    setAdmin({ name: "", level: "", email: "" }); // Reset fields
-    onClose();  // Close the modal
+  const [admin, setAdmin] = useState({
+    name: "",
+    adminRole: "",
+    email: "",
+    password: "",
+    role: "admin",
+    gender: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleCreate = async () => {
+    setLoading(true);
+
+    try {
+      await create_admin(admin); // ✅ Make sure this function matches expected API shape
+
+      toast.show({
+        title: "Admin Created",
+        description: "New admin account has been successfully created.",
+        // status: "success",
+      });
+
+      // Reset form only after success
+      setAdmin({
+        name: "",
+        adminRole: "",
+        email: "",
+        password: "",
+        role: "admin",
+        gender: "",
+      });
+
+      onClose();
+    } catch (error: any) {
+      console.error("Admin creation error:", error);
+
+      toast.show({
+        title: "Error",
+        description:
+          error?.response?.data?.message || "Failed to create admin.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,15 +85,6 @@ const AdminAccountCreateModal: React.FC<AdminAccountCreateProps> = ({ isOpen, on
             </FormControl>
 
             <FormControl>
-              <FormControl.Label>Level</FormControl.Label>
-              <Input
-                placeholder="Enter Level"
-                value={admin.level}
-                onChangeText={(text) => setAdmin({ ...admin, level: text })}
-              />
-            </FormControl>
-
-            <FormControl>
               <FormControl.Label>Email</FormControl.Label>
               <Input
                 placeholder="Enter Email"
@@ -49,11 +92,41 @@ const AdminAccountCreateModal: React.FC<AdminAccountCreateProps> = ({ isOpen, on
                 onChangeText={(text) => setAdmin({ ...admin, email: text })}
               />
             </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Password</FormControl.Label>
+              <Input
+                placeholder="Enter Password"
+                value={admin.password}
+                onChangeText={(text) => setAdmin({ ...admin, password: text })}
+                secureTextEntry
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Gender</FormControl.Label>
+              <Input
+                placeholder="Enter Gender"
+                value={admin.gender}
+                onChangeText={(text) => setAdmin({ ...admin, gender: text })}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormControl.Label>Admin Role</FormControl.Label>
+              <Input
+                placeholder="Enter Admin Rank"
+                value={admin.adminRole}
+                onChangeText={(text) => setAdmin({ ...admin, adminRole: text })}
+              />
+            </FormControl>
           </VStack>
         </Modal.Body>
 
         <Modal.Footer>
-          <Button onPress={handleCreate}>Create</Button>
+          <Button onPress={handleCreate} isDisabled={loading}>
+            {loading ? <Spinner color="white" /> : "Create"}
+          </Button>
         </Modal.Footer>
       </Modal.Content>
     </Modal>
