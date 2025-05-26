@@ -7,59 +7,65 @@ import {
   Input,
   HStack,
   AlertDialog,
+  Switch,
 } from "native-base";
+import { delete_teacher } from "@/api/teacher/delete-teacher.api";
+import { update_teacher } from "@/api/teacher/update-teacher.api";
 
 interface TeacherOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  teacher: { id: number; name: string; level: string; faculty: string; email: string } | null;
-  onDelete: (id: number) => void;
-  onUpdate: (updatedTeacher: {
-    id: number;
+  teacher: {
+    id: string;
     name: string;
-    faculty: string;
-    level : string;
     email: string;
-  }) => void;
+    department: string;
+    rank: string;
+    isHOD: boolean;
+    shortName: string;
+  } | null;
+  token: string;
 }
 
 const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
   isOpen,
   onClose,
   teacher,
-  onDelete,
-  onUpdate,
+  token,
 }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [editedTeacher, setEditedTeacher] = useState<{
-    id: number;
-    name: string;
-    faculty: string;
-    level: string;
-    email: string;
-  } | null>(teacher);
-
+  const [editedTeacher, setEditedTeacher] =
+    useState<TeacherOptionsModalProps["teacher"]>(teacher);
   const cancelRef = useRef(null);
 
   useEffect(() => {
     if (editModal && teacher) {
-      setEditedTeacher(teacher); // Set the selected teacher when editing
+      setEditedTeacher(teacher); // Populate when opening edit modal
     }
   }, [editModal, teacher]);
 
   if (!teacher) return null;
 
-  const handleSaveChanges = () => {
-    if (editedTeacher && onUpdate) {
-      onUpdate(editedTeacher);
+  const handleDelete = async (id: string) => {
+    await delete_teacher(id);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editedTeacher) return;
+
+    try {
+      await update_teacher(editedTeacher, token);
       setEditModal(false);
+      onClose();
+    } catch (err) {
+      console.error("Update failed", err);
     }
   };
 
   return (
     <>
-      {/* Teacher Details Modal */}
+      {/* View Modal */}
       <Modal isOpen={isOpen} onClose={onClose}>
         <Modal.Content maxWidth="400px">
           <Modal.CloseButton />
@@ -67,9 +73,11 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
           <Modal.Body>
             <VStack space={4}>
               <Text fontWeight="bold">Name: {teacher.name}</Text>
-              <Text>Faculty: {teacher.faculty}</Text>
-              <Text>Level: {teacher.level}</Text>
+              <Text>Faculty: {teacher.department}</Text>
+              <Text>Level: {teacher.rank}</Text>
               <Text>Email: {teacher.email}</Text>
+              <Text>Short Name: {teacher.shortName}</Text>
+              <Text>Is HOD: {teacher.isHOD ? "Yes" : "No"}</Text>
             </VStack>
           </Modal.Body>
           <Modal.Footer>
@@ -85,7 +93,7 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
         </Modal.Content>
       </Modal>
 
-      {/* Edit Teacher Modal */}
+      {/* Edit Modal */}
       <Modal isOpen={editModal} onClose={() => setEditModal(false)}>
         <Modal.Content maxWidth="400px">
           <Modal.CloseButton />
@@ -101,16 +109,16 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
               />
               <Input
                 placeholder="Faculty"
-                value={editedTeacher?.faculty || ""}
+                value={editedTeacher?.department || ""}
                 onChangeText={(text) =>
-                  setEditedTeacher({ ...editedTeacher!, faculty: text })
+                  setEditedTeacher({ ...editedTeacher!, department: text })
                 }
               />
               <Input
                 placeholder="Level"
-                value={editedTeacher?.level || ""}
+                value={editedTeacher?.rank || ""}
                 onChangeText={(text) =>
-                  setEditedTeacher({ ...editedTeacher!, level: text })
+                  setEditedTeacher({ ...editedTeacher!, rank: text })
                 }
               />
               <Input
@@ -120,6 +128,25 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
                   setEditedTeacher({ ...editedTeacher!, email: text })
                 }
               />
+              <Input
+                placeholder="Short Name"
+                value={editedTeacher?.shortName || ""}
+                onChangeText={(text) =>
+                  setEditedTeacher({ ...editedTeacher!, shortName: text })
+                }
+              />
+              <HStack alignItems="center" space={2}>
+                <Text>Is HOD</Text>
+                <Switch
+                  isChecked={editedTeacher?.isHOD || false}
+                  onToggle={() =>
+                    setEditedTeacher({
+                      ...editedTeacher!,
+                      isHOD: !editedTeacher?.isHOD,
+                    })
+                  }
+                />
+              </HStack>
             </VStack>
           </Modal.Body>
           <Modal.Footer>
@@ -135,7 +162,7 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
         </Modal.Content>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation */}
       <AlertDialog
         leastDestructiveRef={cancelRef}
         isOpen={confirmDelete}
@@ -143,8 +170,8 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
       >
         <AlertDialog.Content>
           <AlertDialog.Header>Confirm Delete</AlertDialog.Header>
-          <AlertDialog.Body padding={4}>
-            Are you sure you want to delete this  account?
+          <AlertDialog.Body>
+            Are you sure you want to delete this account?
           </AlertDialog.Body>
           <AlertDialog.Footer>
             <Button
@@ -157,7 +184,7 @@ const TeacherOptionsModal: React.FC<TeacherOptionsModalProps> = ({
             <Button
               colorScheme="red"
               onPress={() => {
-                onDelete(teacher.id);
+                handleDelete(teacher.id);
                 setConfirmDelete(false);
                 onClose();
               }}

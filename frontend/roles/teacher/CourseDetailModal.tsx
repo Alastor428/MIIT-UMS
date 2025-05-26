@@ -27,10 +27,9 @@ const CourseDetailsModal = ({
             <Text>Name: {course.name}</Text>
             <Text>Time: {course.time}</Text>
             <Text>Room: {course.room}</Text>
-            <Text>Instructor: {course.instructor}</Text>
             <Text>Code: {course.code}</Text>
             <Text>Credit: {course.credit}</Text>
-            <Text>Faculty: {course.faculty}</Text>
+            <Text>Batch: {course.batch}</Text>
             <Text style={{ color: "red", fontWeight: "bold" }}>
               Note: Don't forget the Assignments!
             </Text>

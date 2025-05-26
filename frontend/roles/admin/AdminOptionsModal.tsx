@@ -86,9 +86,9 @@ const AdminOptionsModal: React.FC<AdminOptionsModalProps> = ({
           </Modal.Body>
           <Modal.Footer>
             <HStack space={3}>
-              <Button colorScheme="blue" onPress={() => setEditModal(true)}>
+              {/* <Button colorScheme="blue" onPress={() => setEditModal(true)}>
                 Manage Account
-              </Button>
+              </Button> */}
               <Button colorScheme="red" onPress={() => setConfirmDelete(true)}>
                 Delete Account
               </Button>

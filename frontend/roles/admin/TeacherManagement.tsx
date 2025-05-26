@@ -28,7 +28,11 @@ export type Teacher = {
   shortName: string;
 };
 
-const TeacherManagement = () => {
+interface TeacherManagementProps {
+  token: string;
+}
+
+const TeacherManagement: React.FC<TeacherManagementProps> = ({ token }) => {
   const [faculty, setFaculty] = useState<string>(""); // Faculty state
   const [level, setLevel] = useState<string>(""); // Level state
   const [searchTerm, setSearchTerm] = useState<string>(""); // Search term state
@@ -36,11 +40,13 @@ const TeacherManagement = () => {
   const [modalVisible, setModalVisible] = useState(false); // Modal visibility for adding teacher
   const [optionsModalVisible, setOptionsModalVisible] = useState(false); // Modal visibility for teacher options
   const [selectedTeacher, setSelectedTeacher] = useState<{
-    id: number;
+    id: string;
     name: string;
-    level: string;
-    faculty: string;
     email: string;
+    department: string;
+    rank: string;
+    isHOD: boolean;
+    shortName: string;
   } | null>(null);
 
   // Add teacher function
@@ -191,8 +197,9 @@ const TeacherManagement = () => {
               </HStack>
               <Pressable
                 onPress={() => {
-                  // setSelectedTeacher(item);
+                  setSelectedTeacher(item);
                   setOptionsModalVisible(true);
+                  console.log("pressed");
                 }}
               >
                 <Icon as={Ionicons} name="ellipsis-vertical" size="md" />
@@ -209,15 +216,12 @@ const TeacherManagement = () => {
       />
 
       {/* Teacher Options Modal */}
-      {/* <TeacherOptionsModal
+      <TeacherOptionsModal
         isOpen={optionsModalVisible}
         onClose={() => setOptionsModalVisible(false)}
         teacher={selectedTeacher}
-        onDelete={deleteTeacher}
-        onUpdate={(updatedTeacher) => {
-          updateTeacher({ ...updatedTeacher, faculty });
-        }}
-      /> */}
+        token={token}
+      />
     </Box>
   );
 };

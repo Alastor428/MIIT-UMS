@@ -10,6 +10,7 @@ import { TeacherToDoListService } from './services/teacher-to-do-list.service';
 import { AddCourseToTimetableDto } from './dto/teacher-timetable.dto';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Controller('teacher')
 export class TeacherController {
@@ -68,6 +69,18 @@ export class TeacherController {
     @Param('department') department: string,
   ) {
     return await this.teacherService.getTeacherBydepartment(department);
+  }
+
+  @Put('update-info')
+  async updateTeacherInfo(
+    @Req() req: any,
+    @Body() updateData: UpdateTeacherDto,
+  ) {
+    const updatedTeacher = await this.teacherService.updateTeacher(req.userId, updateData);
+    return {
+      message: "Teacher info updated successfully",
+      teacher: updatedTeacher,
+    };
   }
 
 

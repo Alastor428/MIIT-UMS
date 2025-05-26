@@ -73,7 +73,6 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token, onLogout }) => {
       </Drawer.Screen>
       <Drawer.Screen
         name="Teacher"
-        component={TeacherManagement}
         options={({ navigation }) => ({
           header: () => (
             <Admin_Header
@@ -82,7 +81,9 @@ const Admin_Layout: React.FC<Admin_Layout_Proprs> = ({ token, onLogout }) => {
             />
           ),
         })}
-      />
+      >
+        {(props) => <TeacherManagement {...props} token={token} />}
+      </Drawer.Screen>
       <Drawer.Screen
         name="Student"
         component={StudentManagement}

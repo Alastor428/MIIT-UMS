@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-export const delete_course_student_timetable = async (courseId: string, token: string) => {
+export const delete_course_teacher_timetable = async (courseId: string, token: string) => {
     try {
         const response = await axios.delete(`http://192.168.137.1:3000/api/teacher/course/${courseId}`, {
             headers: {

@@ -28,9 +28,8 @@ export interface Course {
   day: string;
   room: string;
   code: string;
-  instructor: string;
+  batch: string;
   credit: string;
-  faculty: string;
 }
 
 const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
@@ -58,9 +57,8 @@ const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
             day: day,
             room: courseData.room,
             code: courseData.courseCode,
-            instructor: courseData.instructor,
             credit: courseData.credit.toString(),
-            faculty: courseData.faculty,
+            batch: courseData.batch,
           });
         }
       });
@@ -91,11 +89,21 @@ const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
   const [courses, setCourses] = useState<Course[]>([]);
   console.log(courses);
 
+  const [selectedTime, setSelectedTime] = useState<string>();
+  const [selectedDay, setSelectedDay] = useState<string>();
+
+  const date_time = {
+    day: selectedDay,
+    time: selectedTime,
+  };
+
   const handleCourseClick = (
     course: Course | null,
     timeSlot: string,
     day: string
   ) => {
+    setSelectedTime(timeSlot);
+    setSelectedDay(dayMapping[day]);
     if (!course) {
       setNewCourse({
         name: "",
@@ -103,9 +111,8 @@ const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
         day,
         room: "",
         code: "",
-        instructor: "",
+        batch: "",
         credit: "",
-        faculty: "",
       });
       setSelectedCourse(null);
     } else {
@@ -269,9 +276,9 @@ const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
             <AddCourseModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
-              newCourse={newCourse}
-              setNewCourse={setNewCourse}
-              handleCourseSubmit={handleCourseSubmit}
+              date_time={date_time}
+              onCourseAdded={refreshTimetable}
+              teacherId={teacherId}
             />
           ) : selectedCourse ? (
             <OptionsModal
@@ -279,8 +286,9 @@ const Teacher_Timetable: React.FC<TeacherTimeTableProps> = ({
               onClose={() => setIsModalOpen(false)}
               course={selectedCourse}
               onViewMore={handleViewMore}
-              onEdit={handleEdit}
-              onDelete={() => handleDeleteCourse(selectedCourse!)}
+              date_time={date_time}
+              token={token}
+              onCourseAdded={refreshTimetable}
             />
           ) : null}
         </Box>

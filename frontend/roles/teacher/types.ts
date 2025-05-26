@@ -31,8 +31,7 @@ export interface FetchedCourse {
   courseCode: string;
   courseName: string;
   credit: number;
-  faculty: string;
-  instructor: string;
+  batch: string;
   note: string;
   room: string;
 }

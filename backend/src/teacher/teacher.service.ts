@@ -11,6 +11,7 @@ import mongoose, { Model } from 'mongoose';
 import { User } from 'src/auth/schemas/user.schema';
 import { TeacherEventDto } from './dto/teacher-event.dto';
 import { NotificationService } from './services/teacher-notification.service';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Injectable()
 export class TeacherService {
@@ -62,6 +63,46 @@ export class TeacherService {
       message: "Success",
       teachers
     }
+  }
+
+
+  async updateTeacher(userId: string, updateData: UpdateTeacherDto): Promise<Teacher> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const teacher = await this.teacherModel.findOne({ user: user._id });
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    // Update both the teacher and user info if needed
+    if (updateData.name || updateData.email) {
+      await this.userModel.findByIdAndUpdate(
+        userId,
+        {
+          ...(updateData.name && { name: updateData.name }),
+          ...(updateData.email && { email: updateData.email }),
+        },
+        { new: true }
+      );
+    }
+
+    const updatedTeacher = await this.teacherModel.findOneAndUpdate(
+      { user: user._id },
+      {
+        ...(updateData.department && { department: updateData.department }),
+        ...(updateData.shortName && { shortName: updateData.shortName }),
+        ...(updateData.isHOD !== undefined && { isHOD: updateData.isHOD }),
+      },
+      { new: true }
+    ).populate({
+      path: 'user',
+      select: 'name email',
+    });
+
+    return updatedTeacher;
   }
 
   // async getAllTeachers(
